@@ -21,11 +21,11 @@ import {
   Play,
   Mail,
   Linkedin,
-  Github
+  MessageCircle
 } from "lucide-react";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { FormEvent, useRef, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 
 /* ─── Animation Variants ─────────────────────────────────────────────────── */
 const fadeUp: any = {
@@ -261,51 +261,141 @@ function ProductPreview() {
   );
 }
 
+/* ─── Feedback Types ──────────────────────────────────────────────────────── */
+type FeedbackItemType = {
+  id: string;
+  name: string;
+  message: string;
+  created_at: string;
+};
+
 /* ─── Feedback Form ───────────────────────────────────────────────────────── */
-function FeedbackForm() {
+function FeedbackForm({ onSubmitted }: { onSubmitted?: () => void }) {
+  const [name, setName] = useState("");
   const [message, setMessage] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleFeedback = async (e: FormEvent) => {
     e.preventDefault();
     if (!message.trim()) return;
+    setError(null);
 
-    // mailto fallback — opens the user's email client with the feedback pre-filled
-    const subject = encodeURIComponent("Synapse Feedback");
-    const body = encodeURIComponent(message);
-    window.open(`mailto:abdullahbuilds786@gmail.com?subject=${subject}&body=${body}`);
-    setSubmitted(true);
-    setMessage("");
+    try {
+      const res = await fetch(process.env.NEXT_PUBLIC_API_BASE_URL + "/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: name.trim() || "Anonymous", message: message.trim() }),
+      });
+      if (!res.ok) throw new Error("Failed to submit");
+      setSubmitted(true);
+      setMessage("");
+      setName("");
+      onSubmitted?.();
+    } catch {
+      setError("Could not submit feedback. Please try again.");
+    }
   };
 
   return (
-    <form className="space-y-8" onSubmit={handleFeedback}>
+    <form className="space-y-6" onSubmit={handleFeedback}>
+      <div className="relative">
+        <input
+          type="text"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="Your name (optional)"
+          className="w-full bg-transparent text-[15px] text-[var(--text-primary)] focus:outline-none placeholder:text-[var(--text-faint)] border-b border-[var(--border)] pb-3 mb-4 font-medium"
+        />
+      </div>
       <div className="relative">
         <textarea
           value={message}
-          onChange={(e) => { setMessage(e.target.value); setSubmitted(false); }}
+          onChange={(e) => { setMessage(e.target.value); setSubmitted(false); setError(null); }}
           placeholder="What's on your mind? (e.g. 'I'd love a Chrome extension for quick captures')"
-          className="w-full min-h-[160px] bg-transparent text-[16px] text-[var(--text-primary)] focus:outline-none placeholder:text-[var(--text-faint)] resize-none leading-relaxed font-serif italic"
+          className="w-full min-h-[130px] bg-transparent text-[16px] text-[var(--text-primary)] focus:outline-none placeholder:text-[var(--text-faint)] resize-none leading-relaxed font-serif italic"
           style={{ fontFamily: "var(--font-serif)" }}
         />
         <div className="absolute top-0 left-0 w-full h-full pointer-events-none opacity-[0.03] dot-grid" />
       </div>
 
+      {error && <p className="text-[13px] text-red-500 font-mono">{error}</p>}
+
       <div className="flex flex-col sm:flex-row items-center justify-between gap-8 pt-6 border-t border-[var(--border)]">
         <div className="flex items-center gap-3 text-[11px] font-mono text-[var(--text-faint)]">
           <div className="w-2 h-2 rounded-full bg-[var(--accent)] animate-pulse" />
-          {submitted ? "Message drafted — check your email client" : "Engineering direct sync"}
+          {submitted ? "Thank you! Your feedback is live." : "Your voice shapes Synapse"}
         </div>
         <button
           type="submit"
           disabled={!message.trim()}
           className="btn-primary !rounded-lg !px-10 group/btn bg-[var(--text-primary)] !text-[var(--bg)] border-none shadow-[4px_4px_0_0_var(--accent)] active:translate-x-1 active:translate-y-1 active:shadow-none transition-all disabled:opacity-40"
         >
-          {submitted ? "Sent!" : "Send Message"}
+          {submitted ? "Sent!" : "Send Feedback"}
           <ArrowRight size={16} className="group-hover/btn:translate-x-1 transition-transform" />
         </button>
       </div>
     </form>
+  );
+}
+
+/* ─── Feedback Carousel (sliding left-to-right) ───────────────────────────── */
+function FeedbackCarousel({ refreshKey }: { refreshKey: number }) {
+  const [items, setItems] = useState<FeedbackItemType[]>([]);
+
+  useEffect(() => {
+    fetch(process.env.NEXT_PUBLIC_API_BASE_URL + "/feedback")
+      .then((r) => r.json())
+      .then((data) => setItems(data.feedback || []))
+      .catch(() => {});
+  }, [refreshKey]);
+
+  if (items.length === 0) return null;
+
+  // Double the items for seamless infinite scroll
+  const doubled = [...items, ...items];
+
+  return (
+    <div className="mt-16 overflow-hidden">
+      <div className="flex items-center gap-3 mb-8">
+        <MessageCircle size={16} className="text-[var(--text-faint)]" />
+        <span className="font-mono text-[11px] uppercase tracking-[0.15em] text-[var(--text-faint)]">
+          What users are saying ({items.length})
+        </span>
+      </div>
+      <div className="relative">
+        {/* Fade edges */}
+        <div className="absolute left-0 top-0 bottom-0 w-16 bg-gradient-to-r from-[var(--bg)] to-transparent z-10 pointer-events-none" />
+        <div className="absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-[var(--bg)] to-transparent z-10 pointer-events-none" />
+        <motion.div
+          className="flex gap-6"
+          animate={{ x: ["-0%", "-50%"] }}
+          transition={{ x: { duration: Math.max(items.length * 6, 20), ease: "linear", repeat: Infinity } }}
+        >
+          {doubled.map((item, i) => (
+            <div
+              key={`${item.id}-${i}`}
+              className="flex-shrink-0 w-[320px] bg-[var(--bg-subtle)] border border-[var(--border)] rounded-xl p-6 shadow-sm"
+            >
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-8 h-8 rounded-full bg-[var(--accent-soft)] flex items-center justify-center text-[13px] font-bold text-[var(--text-primary)]">
+                  {item.name.charAt(0).toUpperCase()}
+                </div>
+                <div>
+                  <p className="text-[14px] font-semibold text-[var(--text-primary)] leading-tight">{item.name}</p>
+                  <p className="text-[11px] font-mono text-[var(--text-faint)]">
+                    {new Date(item.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                  </p>
+                </div>
+              </div>
+              <p className="text-[14px] text-[var(--text-muted)] leading-relaxed line-clamp-4 italic font-serif" style={{ fontFamily: "var(--font-serif)" }}>
+                "{item.message}"
+              </p>
+            </div>
+          ))}
+        </motion.div>
+      </div>
+    </div>
   );
 }
 
@@ -314,6 +404,7 @@ export default function Home() {
   const router = useRouter();
   const [url, setUrl] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [feedbackRefreshKey, setFeedbackRefreshKey] = useState(0);
 
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault();
@@ -604,11 +695,14 @@ export default function Home() {
                     </h2>
                     <SketchArrow className="absolute -right-16 top-0 rotate-45 opacity-20 hidden lg:block" />
                   </div>
-                  <FeedbackForm />
+                  <FeedbackForm onSubmitted={() => setFeedbackRefreshKey((k) => k + 1)} />
                 </div>
               </div>
             </div>
           </div>
+
+          {/* Feedback Carousel */}
+          <FeedbackCarousel refreshKey={feedbackRefreshKey} />
         </div>
       </Section>
 
@@ -634,9 +728,6 @@ export default function Home() {
                 <a href="mailto:abdullahbuilds786@gmail.com" className="w-12 h-12 rounded-full border-[1.5px] border-[var(--border)] flex items-center justify-center text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:border-[var(--text-primary)] hover:bg-[var(--bg-subtle)] transition-all cursor-pointer shadow-sm">
                   <Mail size={20} />
                 </a>
-                <a href="#" className="w-12 h-12 rounded-full border-[1.5px] border-[var(--border)] flex items-center justify-center text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:border-[var(--text-primary)] hover:bg-[var(--bg-subtle)] transition-all cursor-pointer shadow-sm">
-                  <Github size={20} />
-                </a>
               </div>
             </div>
 
@@ -649,8 +740,8 @@ export default function Home() {
                 {[
                   { name: "Features", href: "/#features" },
                   { name: "Philosophy", href: "/philosophy" },
-                  { name: "Pricing", href: "#" },
-                  { name: "Changelog", href: "#" }
+                  { name: "Generate Notes", href: "/generate" },
+                  { name: "Feedback", href: "/#feedback" }
                 ].map((item) => (
                   <li key={item.name}>
                     <Link href={item.href} className="text-[15px] text-[var(--text-muted)] font-medium hover:text-[var(--text-primary)] transition-colors">
@@ -667,10 +758,10 @@ export default function Home() {
               </h4>
               <ul className="space-y-5">
                 {[
-                  { name: "Documentation", href: "#" },
-                  { name: "API Guide", href: "#" },
-                  { name: "Community", href: "#" },
-                  { name: "Support", href: "#" }
+                  { name: "How It Works", href: "/#how-it-works" },
+                  { name: "Philosophy", href: "/philosophy" },
+                  { name: "Contact", href: "mailto:abdullahbuilds786@gmail.com" },
+                  { name: "LinkedIn", href: "https://linkedin.com/in/abdullah-parvez-565693246/" }
                 ].map((item) => (
                   <li key={item.name}>
                     <Link href={item.href} className="text-[15px] text-[var(--text-muted)] font-medium hover:text-[var(--text-primary)] transition-colors">
@@ -717,8 +808,8 @@ export default function Home() {
                 <div className="w-2 h-2 rounded-full bg-[var(--accent)] animate-pulse" />
                 <span>Global Nodes Online</span>
               </div>
-              <a href="#" className="text-[14px] text-[var(--text-faint)] hover:text-[var(--text-primary)] font-mono transition-colors">Privacy</a>
-              <a href="#" className="text-[14px] text-[var(--text-faint)] hover:text-[var(--text-primary)] font-mono transition-colors">Terms</a>
+              <a href="/#features" className="text-[14px] text-[var(--text-faint)] hover:text-[var(--text-primary)] font-mono transition-colors">Features</a>
+              <a href="/#feedback" className="text-[14px] text-[var(--text-faint)] hover:text-[var(--text-primary)] font-mono transition-colors">Feedback</a>
             </div>
             <div className="text-[14px] text-[var(--text-faint)] font-mono text-center md:text-right italic">
               Built with precision. For those who seek depth.

@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
-from app.routes import health, notes, notion
+from app.routes import health, notes, notion, feedback
 
 app = FastAPI(
     title="Synapse API",
@@ -29,6 +29,7 @@ app.add_middleware(
 app.include_router(health.router, tags=["Health"])
 app.include_router(notes.router, tags=["Notes"])
 app.include_router(notion.router, tags=["Notion"])
+app.include_router(feedback.router, tags=["Feedback"])
 
 
 if __name__ == "__main__":
