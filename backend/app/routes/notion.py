@@ -166,34 +166,59 @@ async def save_to_notion(request: NotionSaveRequest) -> NotionSaveResponse:
         remaining = all_blocks[100:]
 
         # For now, locate a database the integration can access
+        # Try database search first (Notion API v2 uses "data_source")
         search_response = notion.search(
-            filter={"property": "object", "value": "database"},
+            filter={"property": "object", "value": "data_source"},
             page_size=1,
         )
 
-        if not search_response.get("results"):
-            raise HTTPException(
-                status_code=400,
-                detail={
-                    "error": "no_database",
-                    "message": (
-                        "No Notion database found. "
-                        "Share a database with your Synapse integration first."
-                    ),
+        database_results = search_response.get("results", [])
+
+        if database_results:
+            # Create a page inside the database
+            database_id = database_results[0]["id"]
+
+            page = notion.pages.create(
+                parent={"database_id": database_id},
+                properties={
+                    "title": {
+                        "title": [{"type": "text", "text": {"content": title}}],
+                    }
                 },
+                children=first_batch,
             )
+        else:
+            # No database found — look for any accessible page and create a
+            # child page under it instead
+            page_search = notion.search(
+                filter={"property": "object", "value": "page"},
+                page_size=1,
+            )
+            page_results = page_search.get("results", [])
 
-        database_id = search_response["results"][0]["id"]
+            if not page_results:
+                raise HTTPException(
+                    status_code=400,
+                    detail={
+                        "error": "no_workspace_access",
+                        "message": (
+                            "No Notion pages or databases found. "
+                            "Share a page or database with your Synapse integration first."
+                        ),
+                    },
+                )
 
-        page = notion.pages.create(
-            parent={"database_id": database_id},
-            properties={
-                "title": {
-                    "title": [{"type": "text", "text": {"content": title}}],
-                }
-            },
-            children=first_batch,
-        )
+            parent_page_id = page_results[0]["id"]
+
+            page = notion.pages.create(
+                parent={"page_id": parent_page_id},
+                properties={
+                    "title": {
+                        "title": [{"type": "text", "text": {"content": title}}],
+                    }
+                },
+                children=first_batch,
+            )
 
         # Append remaining blocks if any
         if remaining:
