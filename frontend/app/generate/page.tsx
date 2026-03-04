@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Navbar } from "@/components/navbar";
 import { motion, AnimatePresence } from "framer-motion";
-import { Save, ArrowRight, ExternalLink } from "lucide-react";
+import { Copy, Download, ArrowRight, Check } from "lucide-react";
 
 type GeneratedBlock =
     | { type: "heading"; content: string }
@@ -79,35 +79,56 @@ export default function GeneratePage() {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [data, setData] = useState<GeneratedResponse | null>(null);
-    const [isSaving, setIsSaving] = useState(false);
-    const [saveStatus, setSaveStatus] = useState<string | null>(null);
+    const [copied, setCopied] = useState(false);
 
-    const handleSaveToNotion = async () => {
-        if (!data || !('blocks' in data)) return;
-        setIsSaving(true);
-        setSaveStatus(null);
-        try {
-            const res = await fetch(process.env.NEXT_PUBLIC_API_BASE_URL + "/notion/save", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    url: url,
-                    metadata: 'metadata' in data ? data.metadata : {},
-                    blocks: data.blocks
-                })
-            });
-            const result = await res.json();
-            if (result.notion_page_url) {
-                setSaveStatus("Saved!");
-                window.open(result.notion_page_url, '_blank');
-            } else {
-                setSaveStatus("Saved to Notion");
+    /** Convert blocks to clean Markdown text */
+    const blocksToMarkdown = (): string => {
+        if (!data || !('blocks' in data)) return '';
+        const meta = 'metadata' in data ? data.metadata : null;
+        const lines: string[] = [];
+
+        if (meta?.title) lines.push(`# ${meta.title}`, '');
+        if (meta?.channel || meta?.duration)
+            lines.push(`> ${meta.channel || 'YouTube'} · ${meta.duration || ''}`, '');
+
+        for (const block of data.blocks) {
+            switch (block.type) {
+                case 'heading':  lines.push(`## ${block.content}`, ''); break;
+                case 'paragraph': lines.push(block.content, ''); break;
+                case 'bullet':
+                    for (const item of block.items) lines.push(`- ${item}`);
+                    lines.push('');
+                    break;
+                case 'code':
+                    lines.push(`\`\`\`${block.language || ''}`, block.content, '\`\`\`', '');
+                    break;
+                case 'timestamp':
+                    lines.push(`- **\`${block.time}\`** — _${block.topic}_`);
+                    break;
             }
-        } catch (err: any) {
-            setSaveStatus("Failed to save");
-        } finally {
-            setIsSaving(false);
         }
+        return lines.join('\n').trim();
+    };
+
+    const handleCopy = async () => {
+        const md = blocksToMarkdown();
+        await navigator.clipboard.writeText(md);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+    };
+
+    const handleDownload = () => {
+        const md = blocksToMarkdown();
+        const title = (data && 'metadata' in data && data.metadata?.title)
+            ? data.metadata.title.replace(/[^a-zA-Z0-9 ]/g, '').trim().replace(/\s+/g, '-')
+            : 'synapse-notes';
+        const blob = new Blob([md], { type: 'text/markdown;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${title}.md`;
+        a.click();
+        URL.revokeObjectURL(url);
     };
 
     const handleGenerate = async (e: React.FormEvent) => {
@@ -269,14 +290,21 @@ export default function GeneratePage() {
                                                 <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-[var(--text-faint)]">
                                                     Generated Output
                                                 </span>
-                                                <button
-                                                    onClick={handleSaveToNotion}
-                                                    disabled={isSaving}
-                                                    className="flex items-center gap-2 text-[13px] font-medium text-[var(--text-primary)] border border-[var(--border)] px-4 py-2 hover:bg-[var(--bg)] transition-colors disabled:opacity-50"
-                                                >
-                                                    <Save size={14} /> {isSaving ? "Saving..." : saveStatus || "Sync to Notion"}
-                                                    {saveStatus === "Saved!" && <ExternalLink size={12} />}
-                                                </button>
+                                                <div className="flex gap-2">
+                                                    <button
+                                                        onClick={handleCopy}
+                                                        className="flex items-center gap-2 text-[13px] font-medium text-[var(--text-primary)] border border-[var(--border)] px-4 py-2 hover:bg-[var(--bg)] transition-colors"
+                                                    >
+                                                        {copied ? <Check size={14} /> : <Copy size={14} />}
+                                                        {copied ? "Copied!" : "Copy"}
+                                                    </button>
+                                                    <button
+                                                        onClick={handleDownload}
+                                                        className="flex items-center gap-2 text-[13px] font-medium text-[var(--text-primary)] border border-[var(--border)] px-4 py-2 hover:bg-[var(--bg)] transition-colors"
+                                                    >
+                                                        <Download size={14} /> Download .md
+                                                    </button>
+                                                </div>
                                             </div>
                                             <h2 className="text-[40px] font-light text-[var(--text-primary)] leading-tight mb-8 font-[var(--font-serif)]">
                                                 {("metadata" in data && data.metadata?.title) || "Generated Notes"}
