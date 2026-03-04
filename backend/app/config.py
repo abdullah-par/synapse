@@ -2,7 +2,7 @@ from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
-    anthropic_api_key: str
+    groq_api_key: str
     notion_api_key: str
     frontend_url: str = "http://localhost:3000"
     environment: str = "development"

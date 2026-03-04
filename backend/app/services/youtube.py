@@ -94,8 +94,9 @@ def get_transcript(video_id: str) -> str:
     - Truncate to 40,000 characters (safe Claude context limit)
     """
     try:
-        transcript_list = YouTubeTranscriptApi.get_transcript(video_id)
-        raw_text = " ".join(entry.get("text", "") for entry in transcript_list)
+        ytt_api = YouTubeTranscriptApi()
+        transcript = ytt_api.fetch(video_id)
+        raw_text = " ".join(snippet.text for snippet in transcript.snippets)
     except TranscriptsDisabled:
         raise HTTPException(
             status_code=404,

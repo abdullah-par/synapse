@@ -2,14 +2,17 @@ import json
 import re
 from typing import Dict
 
-import anthropic
+from groq import Groq
 from fastapi import HTTPException
 from tenacity import retry, stop_after_attempt, wait_exponential
 
 from app.config import settings
 
 
-client = anthropic.Anthropic(api_key=settings.anthropic_api_key)
+client = Groq(api_key=settings.groq_api_key)
+
+# Groq model — llama-3.3-70b-versatile has large context and strong JSON output
+MODEL = "llama-3.3-70b-versatile"
 
 SYSTEM_PROMPT = """You are an expert educational content synthesizer. 
 Your job is to transform raw YouTube video transcripts into structured, 
@@ -85,25 +88,27 @@ def generate_notes_with_claude(
     transcript: str,
 ) -> Dict:
     """
-    Call Claude API and return parsed notes dict.
+    Call Groq API and return parsed notes dict.
     Retries up to 3 times on failure with exponential backoff.
     """
     try:
-        message = client.messages.create(
-            model="claude-3-5-sonnet-20241022",
+        chat_completion = client.chat.completions.create(
+            model=MODEL,
             max_tokens=4096,
-            system=SYSTEM_PROMPT,
+            temperature=0.3,
+            response_format={"type": "json_object"},
             messages=[
+                {"role": "system", "content": SYSTEM_PROMPT},
                 {
                     "role": "user",
                     "content": build_prompt(title, channel, duration, transcript),
-                }
+                },
             ],
         )
 
-        raw_text = message.content[0].text.strip()
+        raw_text = chat_completion.choices[0].message.content.strip()
 
-        # Strip any accidental markdown code fences Claude might add
+        # Strip any accidental markdown code fences the model might add
         raw_text = re.sub(r"^```json\s*", "", raw_text)
         raw_text = re.sub(r"^```\s*", "", raw_text)
         raw_text = re.sub(r"\s*```$", "", raw_text)
@@ -112,9 +117,9 @@ def generate_notes_with_claude(
 
         # Basic structure validation
         if "blocks" not in parsed:
-            raise ValueError("Claude response missing 'blocks' field")
+            raise ValueError("AI response missing 'blocks' field")
         if "metadata" not in parsed:
-            raise ValueError("Claude response missing 'metadata' field")
+            raise ValueError("AI response missing 'metadata' field")
 
         return parsed
 
@@ -124,15 +129,6 @@ def generate_notes_with_claude(
             detail={
                 "error": "ai_parse_error",
                 "message": "AI response could not be parsed. Please try again.",
-                "detail": str(exc),
-            },
-        ) from exc
-    except anthropic.APIStatusError as exc:  # pragma: no cover - network errors
-        raise HTTPException(
-            status_code=503,
-            detail={
-                "error": "ai_unavailable",
-                "message": "AI service is temporarily unavailable. Please try again.",
                 "detail": str(exc),
             },
         ) from exc

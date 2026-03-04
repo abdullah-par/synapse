@@ -127,7 +127,10 @@ export default function GeneratePage() {
 
             if (!res.ok) {
                 const payload = await res.json().catch(() => null);
-                const message = payload?.detail || "Failed to generate notes.";
+                const detail = payload?.detail;
+                const message = typeof detail === "string"
+                    ? detail
+                    : detail?.message || "Failed to generate notes.";
                 throw new Error(message);
             }
 
