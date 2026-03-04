@@ -25,7 +25,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { FormEvent, useState } from "react";
+import { FormEvent, useRef, useState } from "react";
 
 /* ─── Animation Variants ─────────────────────────────────────────────────── */
 const fadeUp: any = {
@@ -258,6 +258,54 @@ function ProductPreview() {
         <span className="text-[13px] font-medium text-[var(--text-primary)]">4.2s generation</span>
       </motion.div>
     </div>
+  );
+}
+
+/* ─── Feedback Form ───────────────────────────────────────────────────────── */
+function FeedbackForm() {
+  const [message, setMessage] = useState("");
+  const [submitted, setSubmitted] = useState(false);
+
+  const handleFeedback = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!message.trim()) return;
+
+    // mailto fallback — opens the user's email client with the feedback pre-filled
+    const subject = encodeURIComponent("Synapse Feedback");
+    const body = encodeURIComponent(message);
+    window.open(`mailto:abdullahbuilds786@gmail.com?subject=${subject}&body=${body}`);
+    setSubmitted(true);
+    setMessage("");
+  };
+
+  return (
+    <form className="space-y-8" onSubmit={handleFeedback}>
+      <div className="relative">
+        <textarea
+          value={message}
+          onChange={(e) => { setMessage(e.target.value); setSubmitted(false); }}
+          placeholder="What's on your mind? (e.g. 'I'd love a Chrome extension for quick captures')"
+          className="w-full min-h-[160px] bg-transparent text-[16px] text-[var(--text-primary)] focus:outline-none placeholder:text-[var(--text-faint)] resize-none leading-relaxed font-serif italic"
+          style={{ fontFamily: "var(--font-serif)" }}
+        />
+        <div className="absolute top-0 left-0 w-full h-full pointer-events-none opacity-[0.03] dot-grid" />
+      </div>
+
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-8 pt-6 border-t border-[var(--border)]">
+        <div className="flex items-center gap-3 text-[11px] font-mono text-[var(--text-faint)]">
+          <div className="w-2 h-2 rounded-full bg-[var(--accent)] animate-pulse" />
+          {submitted ? "Message drafted — check your email client" : "Engineering direct sync"}
+        </div>
+        <button
+          type="submit"
+          disabled={!message.trim()}
+          className="btn-primary !rounded-lg !px-10 group/btn bg-[var(--text-primary)] !text-[var(--bg)] border-none shadow-[4px_4px_0_0_var(--accent)] active:translate-x-1 active:translate-y-1 active:shadow-none transition-all disabled:opacity-40"
+        >
+          {submitted ? "Sent!" : "Send Message"}
+          <ArrowRight size={16} className="group-hover/btn:translate-x-1 transition-transform" />
+        </button>
+      </div>
+    </form>
   );
 }
 
@@ -556,30 +604,7 @@ export default function Home() {
                     </h2>
                     <SketchArrow className="absolute -right-16 top-0 rotate-45 opacity-20 hidden lg:block" />
                   </div>
-                  <form className="space-y-8">
-                    <div className="relative">
-                      <textarea
-                        placeholder="What's on your mind? (e.g. 'I'd love a Chrome extension for quick captures')"
-                        className="w-full min-h-[160px] bg-transparent text-[16px] text-[var(--text-primary)] focus:outline-none placeholder:text-[var(--text-faint)] resize-none leading-relaxed font-serif italic"
-                        style={{ fontFamily: "var(--font-serif)" }}
-                      />
-                      <div className="absolute top-0 left-0 w-full h-full pointer-events-none opacity-[0.03] dot-grid" />
-                    </div>
-
-                    <div className="flex flex-col sm:flex-row items-center justify-between gap-8 pt-6 border-t border-[var(--border)]">
-                      <div className="flex items-center gap-3 text-[11px] font-mono text-[var(--text-faint)]">
-                        <div className="w-2 h-2 rounded-full bg-[var(--accent)] animate-pulse" />
-                        Engineering direct sync
-                      </div>
-                      <button
-                        type="submit"
-                        className="btn-primary !rounded-lg !px-10 group/btn bg-[var(--text-primary)] !text-[var(--bg)] border-none shadow-[4px_4px_0_0_var(--accent)] active:translate-x-1 active:translate-y-1 active:shadow-none transition-all"
-                      >
-                        Send Message
-                        <ArrowRight size={16} className="group-hover/btn:translate-x-1 transition-transform" />
-                      </button>
-                    </div>
-                  </form>
+                  <FeedbackForm />
                 </div>
               </div>
             </div>

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Navbar } from "@/components/navbar";
 import { motion, AnimatePresence } from "framer-motion";
-import { Save, ArrowRight } from "lucide-react";
+import { Save, ArrowRight, ExternalLink } from "lucide-react";
 
 type GeneratedBlock =
     | { type: "heading"; content: string }
@@ -79,6 +79,36 @@ export default function GeneratePage() {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [data, setData] = useState<GeneratedResponse | null>(null);
+    const [isSaving, setIsSaving] = useState(false);
+    const [saveStatus, setSaveStatus] = useState<string | null>(null);
+
+    const handleSaveToNotion = async () => {
+        if (!data || !('blocks' in data)) return;
+        setIsSaving(true);
+        setSaveStatus(null);
+        try {
+            const res = await fetch(process.env.NEXT_PUBLIC_API_BASE_URL + "/notion/save", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    url: url,
+                    metadata: 'metadata' in data ? data.metadata : {},
+                    blocks: data.blocks
+                })
+            });
+            const result = await res.json();
+            if (result.notion_page_url) {
+                setSaveStatus("Saved!");
+                window.open(result.notion_page_url, '_blank');
+            } else {
+                setSaveStatus("Saved to Notion");
+            }
+        } catch (err: any) {
+            setSaveStatus("Failed to save");
+        } finally {
+            setIsSaving(false);
+        }
+    };
 
     const handleGenerate = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -236,8 +266,13 @@ export default function GeneratePage() {
                                                 <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-[var(--text-faint)]">
                                                     Generated Output
                                                 </span>
-                                                <button className="flex items-center gap-2 text-[13px] font-medium text-[var(--text-primary)] border border-[var(--border)] px-4 py-2 hover:bg-[var(--bg)] transition-colors">
-                                                    <Save size={14} /> Sync to Notion
+                                                <button
+                                                    onClick={handleSaveToNotion}
+                                                    disabled={isSaving}
+                                                    className="flex items-center gap-2 text-[13px] font-medium text-[var(--text-primary)] border border-[var(--border)] px-4 py-2 hover:bg-[var(--bg)] transition-colors disabled:opacity-50"
+                                                >
+                                                    <Save size={14} /> {isSaving ? "Saving..." : saveStatus || "Sync to Notion"}
+                                                    {saveStatus === "Saved!" && <ExternalLink size={12} />}
                                                 </button>
                                             </div>
                                             <h2 className="text-[40px] font-light text-[var(--text-primary)] leading-tight mb-8 font-[var(--font-serif)]">
