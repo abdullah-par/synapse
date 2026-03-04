@@ -144,7 +144,7 @@ function SketchHighlight({ className = "" }: { className?: string }) {
 /* ─── Fake UI Preview ─────────────────────────────────────────────────────── */
 function ProductPreview() {
   return (
-    <div className="relative w-full max-w-[560px] mx-auto">
+    <div className="relative w-full max-w-[560px] mx-auto px-4 sm:px-0">
       {/* Main card */}
       <div
         className="relative rounded-2xl border border-[var(--border)] overflow-hidden shadow-[0_20px_50px_-12px_var(--accent-glow)]"
@@ -155,8 +155,8 @@ function ProductPreview() {
           <div className="w-3 h-3 rounded-full shadow-inner" style={{ background: "var(--mac-red)" }} />
           <div className="w-3 h-3 rounded-full shadow-inner" style={{ background: "var(--mac-yellow)" }} />
           <div className="w-3 h-3 rounded-full shadow-inner" style={{ background: "var(--mac-green)" }} />
-          <div className="flex-1 mx-4 h-6 rounded-md bg-[var(--border)]/50 border border-[var(--border)] flex items-center px-3">
-            <span className="text-[11px] text-[var(--text-faint)] font-mono">notion.so/my-notes/synapse-output</span>
+          <div className="flex-1 mx-4 h-6 rounded-md bg-[var(--border)]/50 border border-[var(--border)] flex items-center px-3 overflow-hidden">
+            <span className="text-[11px] text-[var(--text-faint)] font-mono truncate">notion.so/my-notes/synapse-output</span>
           </div>
         </div>
 
@@ -242,20 +242,20 @@ function ProductPreview() {
         initial={{ opacity: 0, scale: 0.8, y: 10 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.8 }}
-        className="absolute -top-4 -right-4 md:-right-8 bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl px-4 py-2.5 shadow-[var(--shadow-md)] flex items-center gap-2"
+        className="absolute -top-4 -right-1 sm:-right-4 md:-right-8 bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl px-3 sm:px-4 py-2 sm:py-2.5 shadow-[var(--shadow-md)] flex items-center gap-2 text-[12px] sm:text-[13px]"
       >
         <CheckCircle2 size={16} className="text-black" />
-        <span className="text-[13px] font-medium text-[var(--text-primary)]">Notes ready!</span>
+        <span className="font-medium text-[var(--text-primary)]">Notes ready!</span>
       </motion.div>
 
       <motion.div
         initial={{ opacity: 0, scale: 0.8, y: 10 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 1 }}
-        className="absolute -bottom-5 -left-4 md:-left-8 bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl px-4 py-2.5 shadow-[0_8px_30px_var(--accent-glow)] flex items-center gap-2"
+        className="absolute -bottom-5 -left-1 sm:-left-4 md:-left-8 bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl px-3 sm:px-4 py-2 sm:py-2.5 shadow-[0_8px_30px_var(--accent-glow)] flex items-center gap-2 text-[12px] sm:text-[13px]"
       >
         <Zap size={16} className="text-[var(--accent)]" />
-        <span className="text-[13px] font-medium text-[var(--text-primary)]">4.2s generation</span>
+        <span className="font-medium text-[var(--text-primary)]">4.2s generation</span>
       </motion.div>
     </div>
   );
@@ -356,7 +356,7 @@ function FeedbackCarousel({ refreshKey }: { refreshKey: number }) {
   const doubled = [...items, ...items];
 
   return (
-    <div className="mt-16 overflow-hidden">
+    <div className="mt-10 sm:mt-16 overflow-hidden">
       <div className="flex items-center gap-3 mb-8">
         <MessageCircle size={16} className="text-[var(--text-faint)]" />
         <span className="font-mono text-[11px] uppercase tracking-[0.15em] text-[var(--text-faint)]">
@@ -375,7 +375,7 @@ function FeedbackCarousel({ refreshKey }: { refreshKey: number }) {
           {doubled.map((item, i) => (
             <div
               key={`${item.id}-${i}`}
-              className="flex-shrink-0 w-[320px] bg-[var(--bg-subtle)] border border-[var(--border)] rounded-xl p-6 shadow-sm"
+              className="flex-shrink-0 w-[260px] sm:w-[320px] bg-[var(--bg-subtle)] border border-[var(--border)] rounded-xl p-5 sm:p-6 shadow-sm"
             >
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-8 h-8 rounded-full bg-[var(--accent-soft)] flex items-center justify-center text-[13px] font-bold text-[var(--text-primary)]">
@@ -420,7 +420,7 @@ export default function Home() {
 
       {/* ── Hero ──────────────────────────────────────────────────────────── */}
       <section
-        className="relative pt-24 pb-32 md:pt-36 md:pb-44 overflow-hidden"
+        className="relative pt-16 pb-20 sm:pt-24 sm:pb-32 md:pt-36 md:pb-44 overflow-hidden"
         style={{ background: "var(--bg)" }}
       >
         {/* Background Sketch Decor */}
@@ -429,7 +429,7 @@ export default function Home() {
         <SketchArrow className="absolute top-1/4 right-[15%] hidden lg:block" />
 
         <div className="page-shell relative z-10">
-          <div className="flex flex-col lg:flex-row items-center gap-20 lg:gap-16">
+            <div className="flex flex-col lg:flex-row items-center gap-12 sm:gap-16 lg:gap-16">
             {/* Left */}
             <div className="flex-1 text-center lg:text-left max-w-[580px] mx-auto lg:mx-0">
               {/* Badge */}
@@ -438,7 +438,7 @@ export default function Home() {
                 initial="hidden"
                 animate="show"
                 custom={0}
-                className="flex justify-center lg:justify-start mb-8 relative inline-flex"
+                className="flex justify-center lg:justify-start mb-8"
               >
                 <span className="badge relative group">
                   <Sparkles size={12} className="shrink-0" />
@@ -659,12 +659,12 @@ export default function Home() {
       </Section>
 
       {/* ── Feedback Section (Paper Side-by-Side) ────────────────────────── */}
-      <Section id="feedback" className="py-28 md:py-48 bg-[var(--bg-subtle)]/30">
+      <Section id="feedback" className="py-16 sm:py-28 md:py-48 bg-[var(--bg-subtle)]/30">
         <div className="page-shell">
           <div className="max-w-[1000px] mx-auto">
-            <div className="flex flex-col md:flex-row items-stretch feedback-paper rounded-3xl overflow-hidden min-h-[580px]">
+            <div className="flex flex-col md:flex-row items-stretch feedback-paper rounded-3xl overflow-hidden md:min-h-[580px]">
               {/* Image Side */}
-              <div className="w-full md:w-5/12 relative border-r-[1.5px] border-[var(--border)] group">
+              <div className="w-full h-[200px] sm:h-[260px] md:h-auto md:w-5/12 relative border-b-[1.5px] md:border-b-0 md:border-r-[1.5px] border-[var(--border)] group">
                 <Image
                   src="/assets/feedback.jpeg"
                   alt="Building Synapse"
@@ -686,7 +686,7 @@ export default function Home() {
                   <span className="text-[11px] font-mono text-[var(--text-faint)] uppercase tracking-widest">Feedback / draft_02.md</span>
                 </div>
 
-                <div className="p-8 md:p-12 flex-1 flex flex-col justify-center">
+                <div className="p-5 sm:p-8 md:p-12 flex-1 flex flex-col justify-center">
                   <div className="mb-10 relative">
 
                     <h2 className="text-[clamp(28px,4vw,40px)] font-bold tracking-[-0.04em] text-[var(--text-primary)] mb-4 relative inline-block">
@@ -707,9 +707,9 @@ export default function Home() {
       </Section>
 
 
-      <footer className="border-t border-[var(--border)] bg-[var(--bg)] pt-32 pb-16">
+      <footer className="border-t border-[var(--border)] bg-[var(--bg)] pt-16 sm:pt-24 lg:pt-32 pb-12 sm:pb-16">
         <div className="page-shell">
-          <div className="grid grid-cols-2 lg:grid-cols-12 gap-y-16 gap-x-12 mb-24">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-y-12 sm:gap-y-16 gap-x-8 sm:gap-x-12 mb-16 sm:mb-24">
             {/* Brand column */}
             <div className="col-span-2 lg:col-span-4">
               <Link href="/" className="flex items-center gap-3 group mb-10">
@@ -801,8 +801,8 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="flex flex-col md:flex-row justify-between items-center gap-8 pt-12 border-t border-[var(--border)]">
-            <div className="flex flex-wrap items-center justify-center md:justify-start gap-10">
+          <div className="flex flex-col items-center gap-6 sm:gap-8 pt-12 border-t border-[var(--border)] md:flex-row md:justify-between">
+            <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 sm:gap-10">
               <span className="text-[14px] text-[var(--text-faint)] font-mono">© 2026 Synapse</span>
               <div className="flex items-center gap-2.5 text-[14px] text-[var(--text-faint)] font-mono">
                 <div className="w-2 h-2 rounded-full bg-[var(--accent)] animate-pulse" />

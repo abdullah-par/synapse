@@ -69,7 +69,7 @@ export default function PhilosophyPage() {
             <div className="relative z-10">
                 <Navbar />
 
-                <section className="page-shell pt-24 pb-36 md:pt-40 max-w-[800px] mx-auto">
+                <section className="page-shell pt-16 pb-20 sm:pt-24 sm:pb-36 md:pt-40 max-w-[800px] mx-auto">
                     <motion.div
                         variants={fadeUp}
                         initial="hidden"
@@ -87,7 +87,7 @@ export default function PhilosophyPage() {
                         initial="hidden"
                         animate="show"
                         custom={0.1}
-                        className="text-[clamp(48px,5vw,72px)] font-light leading-[1.05] tracking-[-0.03em] text-[var(--text-primary)] mb-16 font-[var(--font-sans)]"
+                        className="text-[clamp(36px,5vw,72px)] font-light leading-[1.05] tracking-[-0.03em] text-[var(--text-primary)] mb-10 sm:mb-16 font-[var(--font-sans)]"
                     >
                         A tool for <br />
                         <span className="italic font-[var(--font-serif)] relative inline-block">

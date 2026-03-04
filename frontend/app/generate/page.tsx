@@ -174,8 +174,8 @@ export default function GeneratePage() {
             <div className="relative z-10">
                 <Navbar />
 
-                <section className="page-shell pt-24 pb-36 md:pt-40">
-                    <div className="grid grid-cols-1 lg:grid-cols-[40%_60%] gap-16 lg:gap-24">
+                <section className="page-shell pt-16 pb-20 md:pt-24 lg:pt-40 md:pb-36">
+                    <div className="grid grid-cols-1 lg:grid-cols-[40%_60%] gap-10 lg:gap-24">
                         {/* Left Column: Controls */}
                         <div className="flex flex-col justify-center">
                             <motion.div
@@ -195,7 +195,7 @@ export default function GeneratePage() {
                                 initial="hidden"
                                 animate="show"
                                 custom={0.1}
-                                className="text-[clamp(48px,5vw,72px)] font-light leading-[1.05] tracking-[-0.03em] text-[var(--text-primary)] mb-6 font-[var(--font-sans)]"
+                                className="text-[clamp(36px,5vw,72px)] font-light leading-[1.05] tracking-[-0.03em] text-[var(--text-primary)] mb-6 font-[var(--font-sans)]"
                             >
                                 Knowledge <br />
                                 <span className="italic font-[var(--font-serif)] relative inline-block">
@@ -261,7 +261,7 @@ export default function GeneratePage() {
                             initial={{ opacity: 0, scale: 0.95 }}
                             animate={{ opacity: 1, scale: 1 }}
                             transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
-                            className="min-h-[500px] h-full flex items-stretch"
+                            className="min-h-[300px] lg:min-h-[500px] h-full flex items-stretch"
                         >
                             <AnimatePresence mode="wait">
                                 {isLoading ? (
@@ -282,34 +282,34 @@ export default function GeneratePage() {
                                         key="notes"
                                         initial={{ opacity: 0, y: 10 }}
                                         animate={{ opacity: 1, y: 0 }}
-                                        className="bg-[var(--bg-subtle)] border border-[var(--border)] p-12 md:p-20"
+                                        className="bg-[var(--bg-subtle)] border border-[var(--border)] p-5 sm:p-8 md:p-12 lg:p-20 w-full"
                                     >
                                         {/* Note Header */}
-                                        <div className="mb-16 pb-12 border-b border-[var(--border)]">
-                                            <div className="flex justify-between items-start mb-12">
+                                        <div className="mb-8 sm:mb-12 lg:mb-16 pb-8 sm:pb-12 border-b border-[var(--border)]">
+                                            <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-8 sm:mb-12">
                                                 <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-[var(--text-faint)]">
                                                     Generated Output
                                                 </span>
-                                                <div className="flex gap-2">
+                                                <div className="flex flex-wrap gap-2">
                                                     <button
                                                         onClick={handleCopy}
-                                                        className="flex items-center gap-2 text-[13px] font-medium text-[var(--text-primary)] border border-[var(--border)] px-4 py-2 hover:bg-[var(--bg)] transition-colors"
+                                                        className="flex items-center gap-2 text-[12px] sm:text-[13px] font-medium text-[var(--text-primary)] border border-[var(--border)] px-3 sm:px-4 py-2 hover:bg-[var(--bg)] transition-colors"
                                                     >
                                                         {copied ? <Check size={14} /> : <Copy size={14} />}
                                                         {copied ? "Copied!" : "Copy"}
                                                     </button>
                                                     <button
                                                         onClick={handleDownload}
-                                                        className="flex items-center gap-2 text-[13px] font-medium text-[var(--text-primary)] border border-[var(--border)] px-4 py-2 hover:bg-[var(--bg)] transition-colors"
+                                                        className="flex items-center gap-2 text-[12px] sm:text-[13px] font-medium text-[var(--text-primary)] border border-[var(--border)] px-3 sm:px-4 py-2 hover:bg-[var(--bg)] transition-colors"
                                                     >
-                                                        <Download size={14} /> Download .md
+                                                        <Download size={14} /> <span className="hidden sm:inline">Download</span> .md
                                                     </button>
                                                 </div>
                                             </div>
-                                            <h2 className="text-[40px] font-light text-[var(--text-primary)] leading-tight mb-8 font-[var(--font-serif)]">
+                                            <h2 className="text-[24px] sm:text-[32px] lg:text-[40px] font-light text-[var(--text-primary)] leading-tight mb-6 sm:mb-8 font-[var(--font-serif)]">
                                                 {("metadata" in data && data.metadata?.title) || "Generated Notes"}
                                             </h2>
-                                            <div className="flex gap-12">
+                                            <div className="flex gap-6 sm:gap-12">
                                                 <div className="flex flex-col">
                                                     <span className="font-mono text-[10px] uppercase text-[var(--text-faint)]">Channel</span>
                                                     <span className="text-[14px]">
@@ -326,7 +326,7 @@ export default function GeneratePage() {
                                         </div>
 
                                         {/* Note Content */}
-                                        <div className="space-y-12 max-w-[600px]">
+                                        <div className="space-y-8 sm:space-y-12 max-w-full lg:max-w-[600px]">
                                             {"blocks" in data &&
                                                 data.blocks?.map((block, i) => (
                                                     <NoteBlock key={i} block={block} />
@@ -334,7 +334,7 @@ export default function GeneratePage() {
                                         </div>
                                     </motion.div>
                                 ) : (
-                                    <div className="h-full w-full flex items-center justify-center border border-dashed border-[var(--border)] rounded-2xl p-12 lg:p-20 opacity-40 bg-[var(--bg-card)]/50">
+                                    <div className="h-full w-full flex items-center justify-center border border-dashed border-[var(--border)] rounded-2xl p-8 sm:p-12 lg:p-20 opacity-40 bg-[var(--bg-card)]/50">
                                         <span className="font-serif italic text-2xl text-[var(--text-muted)] text-center max-w-[300px] leading-relaxed">
                                             Distill time into wisdom. <br />
                                             Paste a link to begin.
