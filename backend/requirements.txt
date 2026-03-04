@@ -1,8 +1,11 @@
 fastapi
-uvicorn
+uvicorn[standard]
 python-dotenv
-youtube-transcript-api
-openai
-requests
+pydantic-settings
 pydantic
+anthropic
+youtube-transcript-api
 yt-dlp
+notion-client
+httpx
+tenacity
