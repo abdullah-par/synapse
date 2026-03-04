@@ -16,6 +16,8 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:3000",
+        "https://synapse-33byajnx2-abdullah-pars-projects.vercel.app",
+        "https://usesynapse.tech",
         settings.frontend_url,
     ],
     allow_credentials=True,
