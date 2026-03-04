@@ -17,6 +17,7 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:3000",
         "https://synapse-33byajnx2-abdullah-pars-projects.vercel.app",
+        "https://synapse-kappa-opal.vercel.app",
         "https://usesynapse.tech",
         settings.frontend_url,
     ],
