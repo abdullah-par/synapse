@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Navbar } from "@/components/navbar";
+import API_BASE from "@/lib/api";
 import { motion, AnimatePresence } from "framer-motion";
 import { Copy, Download, ArrowRight, Check } from "lucide-react";
 
@@ -140,7 +141,7 @@ export default function GeneratePage() {
         setData(null);
 
         try {
-            const res = await fetch(process.env.NEXT_PUBLIC_API_BASE_URL + "/generate-notes", {
+            const res = await fetch(API_BASE + "/generate-notes", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ url: url.trim() }),

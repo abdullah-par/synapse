@@ -1,4 +1,5 @@
 import json
+import os
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
@@ -10,32 +11,55 @@ from app.schemas.feedback import FeedbackSubmitRequest, FeedbackItem, FeedbackLi
 
 router = APIRouter()
 
-# Simple file-based storage — works for single-server deployments
-FEEDBACK_FILE = Path(__file__).resolve().parent.parent.parent / "feedback.json"
+# ---------------------------------------------------------------------------
+# Storage: prefer /tmp on cloud platforms (ephemeral but writable).
+# On local dev, use the project-level feedback.json.
+# ---------------------------------------------------------------------------
+_FEEDBACK_DIR = os.environ.get("FEEDBACK_DIR", "")
+if _FEEDBACK_DIR:
+    FEEDBACK_FILE = Path(_FEEDBACK_DIR) / "feedback.json"
+elif os.environ.get("RENDER", "") or os.environ.get("RAILWAY_ENVIRONMENT", ""):
+    # Cloud platforms: /tmp is always writable
+    FEEDBACK_FILE = Path("/tmp") / "feedback.json"
+else:
+    FEEDBACK_FILE = Path(__file__).resolve().parent.parent.parent / "feedback.json"
+
+# In-memory cache — survives between requests even if the file vanishes
+_feedback_cache: List[dict] = []
+_cache_loaded = False
 
 
-def _read_feedback() -> List[dict]:
-    if not FEEDBACK_FILE.exists():
-        return []
+def _load_cache() -> None:
+    """Load from disk into memory (once at startup)."""
+    global _feedback_cache, _cache_loaded
+    if _cache_loaded:
+        return
+    if FEEDBACK_FILE.exists():
+        try:
+            _feedback_cache = json.loads(FEEDBACK_FILE.read_text(encoding="utf-8"))
+        except (json.JSONDecodeError, OSError):
+            _feedback_cache = []
+    _cache_loaded = True
+
+
+def _persist() -> None:
+    """Best-effort write to disk — silently skip if filesystem is read-only."""
     try:
-        return json.loads(FEEDBACK_FILE.read_text(encoding="utf-8"))
-    except (json.JSONDecodeError, OSError):
-        return []
-
-
-def _write_feedback(items: List[dict]) -> None:
-    FEEDBACK_FILE.write_text(
-        json.dumps(items, indent=2, ensure_ascii=False),
-        encoding="utf-8",
-    )
+        FEEDBACK_FILE.parent.mkdir(parents=True, exist_ok=True)
+        FEEDBACK_FILE.write_text(
+            json.dumps(_feedback_cache, indent=2, ensure_ascii=False),
+            encoding="utf-8",
+        )
+    except OSError:
+        pass  # read-only FS on some cloud platforms — cache is still in memory
 
 
 @router.get("/feedback", response_model=FeedbackListResponse)
 async def get_feedback():
     """Return all feedback, newest first."""
-    items = _read_feedback()
+    _load_cache()
     return FeedbackListResponse(
-        feedback=[FeedbackItem(**item) for item in reversed(items)]
+        feedback=[FeedbackItem(**item) for item in reversed(_feedback_cache)]
     )
 
 
@@ -52,8 +76,8 @@ async def submit_feedback(request: FeedbackSubmitRequest):
         "created_at": datetime.now(timezone.utc).isoformat(),
     }
 
-    items = _read_feedback()
-    items.append(item)
-    _write_feedback(items)
+    _load_cache()
+    _feedback_cache.append(item)
+    _persist()
 
     return FeedbackItem(**item)

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Navbar } from "@/components/navbar";
+import API_BASE from "@/lib/api";
 import {
   ArrowRight,
   Zap,
@@ -282,7 +283,7 @@ function FeedbackForm({ onSubmitted }: { onSubmitted?: () => void }) {
     setError(null);
 
     try {
-      const res = await fetch(process.env.NEXT_PUBLIC_API_BASE_URL + "/feedback", {
+      const res = await fetch(API_BASE + "/feedback", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: name.trim() || "Anonymous", message: message.trim() }),
@@ -344,7 +345,7 @@ function FeedbackCarousel({ refreshKey }: { refreshKey: number }) {
   const [items, setItems] = useState<FeedbackItemType[]>([]);
 
   useEffect(() => {
-    fetch(process.env.NEXT_PUBLIC_API_BASE_URL + "/feedback")
+    fetch(API_BASE + "/feedback")
       .then((r) => r.json())
       .then((data) => setItems(data.feedback || []))
       .catch(() => {});
