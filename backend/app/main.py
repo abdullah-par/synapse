@@ -16,7 +16,7 @@ app = FastAPI(
 _origins = [
     "http://localhost:3000",
     "https://synapse-kappa-opal.vercel.app",
-    "https://usesynapse.tech",
+    "https://www.usesynapse.tech",
 ]
 # Add whatever the deploy platform sets as FRONTEND_URL
 if settings.frontend_url and settings.frontend_url not in _origins:
