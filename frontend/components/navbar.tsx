@@ -17,7 +17,7 @@ export function Navbar() {
     }, []);
 
     const navLinks = [
-        { href: "/#how-it-works", label: "How it Works" },
+        { href: "/how-it-works", label: "How it Works" },
         { href: "/#features", label: "Features" },
         { href: "/philosophy", label: "Philosophy" },
     ];

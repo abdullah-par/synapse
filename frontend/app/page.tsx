@@ -19,7 +19,6 @@ import {
   Code2,
   Lock,
   ChevronRight,
-  Play,
   Mail,
   Linkedin,
   MessageCircle
@@ -509,8 +508,7 @@ export default function Home() {
                 <Link href="/generate" className="btn-primary text-[15px] w-full sm:w-auto justify-center">
                   Start for Free <ArrowRight size={15} strokeWidth={2.5} />
                 </Link>
-                <Link href="#how-it-works" className="btn-secondary text-[15px] w-full sm:w-auto justify-center">
-                  <Play size={14} className="text-[var(--accent)]" />
+                <Link href="/how-it-works" className="btn-secondary text-[15px] w-full sm:w-auto justify-center">
                   See how it works
                 </Link>
               </motion.div>
@@ -775,7 +773,7 @@ export default function Home() {
               </h4>
               <ul className="space-y-5">
                 {[
-                  { name: "How It Works", href: "/#how-it-works" },
+                  { name: "How It Works", href: "/how-it-works" },
                   { name: "Philosophy", href: "/philosophy" },
                   { name: "Contact", href: "mailto:abdullahbuilds786@gmail.com" },
                   { name: "LinkedIn", href: "https://linkedin.com/in/abdullah-parvez-565693246/" }

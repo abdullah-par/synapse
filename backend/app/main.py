@@ -17,7 +17,8 @@ _origins = [
     "http://localhost:3000",
     "https://synapse-kappa-opal.vercel.app",
     "https://www.usesynapse.tech",
-    "https://usesynapse.tech"
+    "https://usesynapse.tech",
+    "https://synapse-production-9c44.up.railway.app"
 ]
 # Add whatever the deploy platform sets as FRONTEND_URL
 if settings.frontend_url and settings.frontend_url not in _origins:
