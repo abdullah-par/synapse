@@ -18,6 +18,8 @@ _origins = [
     "https://synapse-kappa-opal.vercel.app",
     "https://www.usesynapse.tech",
     "https://usesynapse.tech",
+    "https://www.usesynaps.tech",
+    "https://usesynaps.tech",
     "https://synapse-production-9c44.up.railway.app"
 ]
 # Add whatever the deploy platform sets as FRONTEND_URL
