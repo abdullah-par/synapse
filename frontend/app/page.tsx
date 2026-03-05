@@ -192,7 +192,7 @@ function ProductPreview() {
               className="flex gap-3 p-3 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-subtle)]"
             >
               <span
-                className="text-[11px] font-mono font-medium shrink-0 mt-0.5 px-2 py-0.5 rounded-md border border-[var(--border)] bg-white text-black"
+                className="text-[11px] font-mono font-medium shrink-0 mt-0.5 px-2 py-0.5 rounded-md border border-[var(--border)] bg-[var(--text-primary)] text-[var(--bg)]"
               >
                 {note.time}
               </span>
@@ -347,7 +347,7 @@ function FeedbackCarousel({ refreshKey }: { refreshKey: number }) {
     fetch(API_BASE + "/feedback")
       .then((r) => r.json())
       .then((data) => setItems(data.feedback || []))
-      .catch(() => {});
+      .catch(() => { });
   }, [refreshKey]);
 
   if (items.length === 0) return null;
@@ -377,15 +377,15 @@ function FeedbackCarousel({ refreshKey }: { refreshKey: number }) {
           className="flex gap-6"
           {...(shouldAnimate
             ? {
-                animate: { x: ["-0%", "-50%"] },
-                transition: {
-                  x: {
-                    duration: Math.max(items.length * 6, 20),
-                    ease: "linear",
-                    repeat: Infinity,
-                  },
+              animate: { x: ["-0%", "-50%"] },
+              transition: {
+                x: {
+                  duration: Math.max(items.length * 6, 20),
+                  ease: "linear",
+                  repeat: Infinity,
                 },
-              }
+              },
+            }
             : {})}
         >
           {displayItems.map((item, i) => (
@@ -445,7 +445,7 @@ export default function Home() {
         <SketchArrow className="absolute top-1/4 right-[15%] hidden lg:block" />
 
         <div className="page-shell relative z-10">
-            <div className="flex flex-col lg:flex-row items-center gap-12 sm:gap-16 lg:gap-16">
+          <div className="flex flex-col lg:flex-row items-center gap-12 sm:gap-16 lg:gap-16">
             {/* Left */}
             <div className="flex-1 text-center lg:text-left max-w-[580px] mx-auto lg:mx-0">
               {/* Badge */}

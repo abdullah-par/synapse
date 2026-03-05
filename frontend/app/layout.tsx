@@ -35,7 +35,7 @@ export default function RootLayout({
       <body
         className={`${geist.variable} ${geistMono.variable} ${newsreader.variable} antialiased`}
       >
-        <ThemeProvider attribute="class" defaultTheme="light">
+        <ThemeProvider attribute="class" defaultTheme="dark">
           {children}
         </ThemeProvider>
       </body>
