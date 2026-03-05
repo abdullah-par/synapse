@@ -353,8 +353,10 @@ function FeedbackCarousel({ refreshKey }: { refreshKey: number }) {
 
   if (items.length === 0) return null;
 
-  // Double the items for seamless infinite scroll
-  const doubled = [...items, ...items];
+  // For few items, show them statically (no animation that scrolls them away)
+  const shouldAnimate = items.length >= 3;
+  // Double only when animating for seamless infinite scroll
+  const displayItems = shouldAnimate ? [...items, ...items] : items;
 
   return (
     <div className="mt-10 sm:mt-16 overflow-hidden">
@@ -365,15 +367,29 @@ function FeedbackCarousel({ refreshKey }: { refreshKey: number }) {
         </span>
       </div>
       <div className="relative">
-        {/* Fade edges */}
-        <div className="absolute left-0 top-0 bottom-0 w-16 bg-gradient-to-r from-[var(--bg)] to-transparent z-10 pointer-events-none" />
-        <div className="absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-[var(--bg)] to-transparent z-10 pointer-events-none" />
+        {/* Fade edges — only when animating */}
+        {shouldAnimate && (
+          <>
+            <div className="absolute left-0 top-0 bottom-0 w-16 bg-gradient-to-r from-[var(--bg)] to-transparent z-10 pointer-events-none" />
+            <div className="absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-[var(--bg)] to-transparent z-10 pointer-events-none" />
+          </>
+        )}
         <motion.div
           className="flex gap-6"
-          animate={{ x: ["-0%", "-50%"] }}
-          transition={{ x: { duration: Math.max(items.length * 6, 20), ease: "linear", repeat: Infinity } }}
+          {...(shouldAnimate
+            ? {
+                animate: { x: ["-0%", "-50%"] },
+                transition: {
+                  x: {
+                    duration: Math.max(items.length * 6, 20),
+                    ease: "linear",
+                    repeat: Infinity,
+                  },
+                },
+              }
+            : {})}
         >
-          {doubled.map((item, i) => (
+          {displayItems.map((item, i) => (
             <div
               key={`${item.id}-${i}`}
               className="flex-shrink-0 w-[260px] sm:w-[320px] bg-[var(--bg-subtle)] border border-[var(--border)] rounded-xl p-5 sm:p-6 shadow-sm"
