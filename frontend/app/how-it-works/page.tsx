@@ -14,6 +14,7 @@ import {
   CheckCircle2,
   Zap,
   ChevronRight,
+  Globe,
 } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -394,6 +395,91 @@ export default function HowItWorksPage() {
                   </p>
                 </motion.div>
               ))}
+            </div>
+          </div>
+        </Section>
+
+        {/* ── Language Support ─────────────────────────────────────────── */}
+        <Section className="py-16 sm:py-24 md:py-32">
+          <div className="page-shell max-w-[900px] mx-auto">
+            <div className="text-center mb-14">
+              <span className="font-mono text-[11px] uppercase tracking-[0.15em] text-[var(--text-faint)] border border-[var(--border)] px-3 py-1.5 inline-block rounded-sm mb-5">
+                <Globe size={11} className="inline -mt-0.5 mr-1.5" />
+                Language Support
+              </span>
+              <h2 className="text-[clamp(28px,4vw,44px)] font-bold tracking-[-0.03em] text-[var(--text-primary)] mb-4">
+                Notes in your language
+              </h2>
+              <p className="text-[16px] text-[var(--text-muted)] max-w-[520px] mx-auto leading-relaxed">
+                Synapse can generate notes in multiple languages regardless of the video&apos;s original language. Watch in English, get notes in Hindi — or any combination.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {[
+                {
+                  code: "EN",
+                  name: "English",
+                  native: "English",
+                  sample: "Structured study notes generated from video content.",
+                  status: "stable" as const,
+                },
+                {
+                  code: "HI",
+                  name: "Hindi",
+                  native: "हिन्दी",
+                  sample: "वीडियो सामग्री से संरचित अध्ययन नोट्स उत्पन्न।",
+                  status: "stable" as const,
+                },
+                {
+                  code: "HI-EN",
+                  name: "Hinglish",
+                  native: "Hindi + English",
+                  sample: "Video content se structured study notes generate kiye gaye.",
+                  status: "stable" as const,
+                },
+              ].map((lang, index) => (
+                <motion.div
+                  key={lang.code}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.4, delay: index * 0.06 }}
+                  className="saas-card !p-6 group relative overflow-hidden"
+                >
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-3">
+                      <span className="font-mono text-[14px] font-bold text-[var(--text-primary)] bg-[var(--bg-subtle)] border border-[var(--border)] px-2.5 py-1 rounded-sm shadow-[2px_2px_0_0_var(--border)]">
+                        {lang.code}
+                      </span>
+                      <div>
+                        <p className="text-[15px] font-semibold text-[var(--text-primary)] leading-tight">
+                          {lang.name}
+                        </p>
+                        <p className="text-[12px] text-[var(--text-faint)] font-mono">
+                          {lang.native}
+                        </p>
+                      </div>
+                    </div>
+                    <span className="flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-wider text-[var(--text-faint)]">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[var(--mac-green)]" />
+                      {lang.status}
+                    </span>
+                  </div>
+                  <p
+                    className="text-[13px] text-[var(--text-muted)] leading-relaxed italic border-l-2 border-[var(--border)] pl-3"
+                    style={{ fontFamily: "var(--font-serif)" }}
+                  >
+                    &ldquo;{lang.sample}&rdquo;
+                  </p>
+                </motion.div>
+              ))}
+            </div>
+
+            <div className="mt-10 text-center">
+              <p className="text-[13px] text-[var(--text-faint)] leading-relaxed max-w-[500px] mx-auto">
+                Input language is auto-detected from the video transcript. Output language is selected by you on the generate page. Code blocks always stay in their original programming language.
+              </p>
             </div>
           </div>
         </Section>

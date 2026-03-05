@@ -191,7 +191,7 @@ def get_transcript(video_id: str) -> str:
     - Join all transcript segments into a single string
     - Remove [Music], [Applause], [Laughter] annotation tags
     - Normalize whitespace
-    - Truncate to 40,000 characters (safe Claude context limit)
+    - Return full transcript (chunking handled by the AI service layer)
     """
     raw_text = None
     _ytt_error = None
@@ -237,6 +237,23 @@ def get_transcript(video_id: str) -> str:
     # Normalize whitespace
     clean_text = " ".join(clean_text.split())
 
-    # Truncate for Claude context window safety
-    return clean_text[:40000]
+    # Return full transcript — chunking is handled by the AI service layer
+    return clean_text
+
+
+def chunk_transcript(text: str, chunk_size: int = 35000, overlap: int = 1000) -> list:
+    """
+    Split a long transcript into overlapping chunks.
+    Overlap ensures context is not lost at chunk boundaries.
+    """
+    if len(text) <= chunk_size:
+        return [text]
+
+    chunks: list = []
+    start = 0
+    while start < len(text):
+        end = start + chunk_size
+        chunks.append(text[start:end])
+        start = end - overlap
+    return chunks
 

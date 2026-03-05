@@ -1,10 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import { useTheme } from "next-themes";
 import { Navbar } from "@/components/navbar";
 import API_BASE from "@/lib/api";
 import { motion, AnimatePresence } from "framer-motion";
 import { Copy, Download, ArrowRight, Check } from "lucide-react";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { oneLight, oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 
 type GeneratedBlock =
     | { type: "heading"; content: string }
@@ -246,9 +249,7 @@ export default function GeneratePage() {
                                         {[
                                             { value: "english", label: "EN" },
                                             { value: "hindi", label: "HI" },
-                                            { value: "urdu", label: "UR" },
-                                            { value: "arabic", label: "AR" },
-                                            { value: "spanish", label: "ES" },
+                                            { value: "hinglish", label: "HI-EN" },
                                         ].map((lang) => (
                                             <button
                                                 key={lang.value}
@@ -305,9 +306,7 @@ export default function GeneratePage() {
                                         <div className="w-10 h-10 border border-[var(--border)] border-t-[var(--text-primary)] rounded-full animate-spin" />
                                         <span className="font-mono text-[11px] uppercase tracking-[0.2em] text-[var(--text-faint)]">
                                             {outputLanguage === "hindi" ? "नोट्स बन रहे हैं..." :
-                                             outputLanguage === "urdu" ? "...نوٹس بن رہے ہیں" :
-                                             outputLanguage === "arabic" ? "...جارٍ إنشاء الملاحظات" :
-                                             outputLanguage === "spanish" ? "Generando notas..." :
+                                             outputLanguage === "hinglish" ? "Notes ban rahe hain..." :
                                              "Generating structured notes"}
                                         </span>
                                     </motion.div>
@@ -385,6 +384,15 @@ export default function GeneratePage() {
 }
 
 function NoteBlock({ block }: { block: any }) {
+    const { resolvedTheme } = useTheme();
+    const [codeCopied, setCodeCopied] = useState(false);
+
+    const handleCodeCopy = async (text: string) => {
+        await navigator.clipboard.writeText(text);
+        setCodeCopied(true);
+        setTimeout(() => setCodeCopied(false), 2000);
+    };
+
     switch (block.type) {
         case "heading":
             return <h3 className="font-sans text-[22px] font-semibold text-[var(--text-primary)] mt-12 mb-6">{block.content}</h3>;
@@ -403,15 +411,41 @@ function NoteBlock({ block }: { block: any }) {
             );
         case "code":
             return (
-                <div className="my-10 bg-[var(--bg)] border border-[var(--border)] p-8 overflow-hidden">
-                    <div className="flex justify-between items-center mb-6">
+                <div className="my-10 rounded-md overflow-hidden border border-[var(--border)]">
+                    {/* Notion-style header bar */}
+                    <div className="flex justify-between items-center px-4 py-2 bg-[var(--bg)] border-b border-[var(--border)]">
                         <span className="font-mono text-[10px] uppercase tracking-wider text-[var(--text-faint)]">
-                            {block.language || "syntax"} block
+                            {block.language || "code"}
                         </span>
+                        <button
+                            onClick={() => handleCodeCopy(block.content)}
+                            className="flex items-center gap-1.5 text-[11px] font-mono text-[var(--text-faint)] hover:text-[var(--text-primary)] transition-colors"
+                        >
+                            {codeCopied ? <Check size={12} /> : <Copy size={12} />}
+                            {codeCopied ? "Copied" : "Copy"}
+                        </button>
                     </div>
-                    <pre className="overflow-x-auto">
-                        <code className="font-mono text-[13px] leading-6 text-[var(--text-primary)]">{block.content}</code>
-                    </pre>
+                    <SyntaxHighlighter
+                        language={block.language || "text"}
+                        style={resolvedTheme === "dark" ? oneDark : oneLight}
+                        customStyle={{
+                            margin: 0,
+                            padding: "1.25rem 1rem",
+                            fontSize: "13px",
+                            lineHeight: "1.7",
+                            background: "var(--bg-subtle)",
+                            borderRadius: 0,
+                        }}
+                        showLineNumbers
+                        lineNumberStyle={{
+                            minWidth: "2.5em",
+                            paddingRight: "1em",
+                            color: "var(--text-faint)",
+                            fontSize: "11px",
+                        }}
+                    >
+                        {block.content}
+                    </SyntaxHighlighter>
                 </div>
             );
         case "timestamp":
