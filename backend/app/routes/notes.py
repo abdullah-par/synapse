@@ -34,6 +34,7 @@ async def generate_notes(request: VideoRequest):
         channel=metadata["channel"],
         duration=metadata["duration"],
         transcript=transcript,
+        output_language=request.output_language,
     )
 
     # Step 5: Ensure metadata in response matches what we fetched

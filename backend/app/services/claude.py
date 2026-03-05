@@ -30,7 +30,18 @@ Rules for your output:
 """
 
 
-def build_prompt(title: str, channel: str, duration: str, transcript: str) -> str:
+def build_prompt(title: str, channel: str, duration: str, transcript: str, output_language: str = "english") -> str:
+    language_instruction = ""
+    if output_language.lower() != "english":
+        language_instruction = f"""
+
+CRITICAL LANGUAGE INSTRUCTION:
+Generate ALL notes in {output_language.upper()} language.
+Every heading, paragraph, bullet point, and timestamp topic must be written in {output_language}.
+Only code blocks should remain in their original programming language.
+The metadata title and channel should stay as-is (original language).
+"""
+
     return f"""
 Video Title: {title}
 Channel: {channel}
@@ -41,7 +52,7 @@ Transcript:
 
 Transform this transcript into structured study notes using this EXACT JSON schema.
 Do not add any fields. Do not remove any fields. Match the schema exactly.
-
+{language_instruction}
 {{
   "metadata": {{
     "title": "exact video title",
@@ -86,6 +97,7 @@ def generate_notes_with_claude(
     channel: str,
     duration: str,
     transcript: str,
+    output_language: str = "english",
 ) -> Dict:
     """
     Call Groq API and return parsed notes dict.
@@ -101,7 +113,7 @@ def generate_notes_with_claude(
                 {"role": "system", "content": SYSTEM_PROMPT},
                 {
                     "role": "user",
-                    "content": build_prompt(title, channel, duration, transcript),
+                    "content": build_prompt(title, channel, duration, transcript, output_language),
                 },
             ],
         )

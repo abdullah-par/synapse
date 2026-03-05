@@ -77,6 +77,7 @@ function SketchLoop({ className = "" }: { className?: string }) {
 
 export default function GeneratePage() {
     const [url, setUrl] = useState("");
+    const [outputLanguage, setOutputLanguage] = useState("english");
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [data, setData] = useState<GeneratedResponse | null>(null);
@@ -144,7 +145,7 @@ export default function GeneratePage() {
             const res = await fetch(API_BASE + "/generate-notes", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ url: url.trim() }),
+                body: JSON.stringify({ url: url.trim(), output_language: outputLanguage }),
             });
 
             if (!res.ok) {
@@ -237,6 +238,34 @@ export default function GeneratePage() {
                                     />
                                 </div>
 
+                                <div className="flex gap-4 items-center">
+                                    <span className="font-mono text-[10px] uppercase tracking-[0.1em] text-[var(--text-faint)] shrink-0">
+                                        Notes Language
+                                    </span>
+                                    <div className="flex gap-2 flex-wrap">
+                                        {[
+                                            { value: "english", label: "EN" },
+                                            { value: "hindi", label: "HI" },
+                                            { value: "urdu", label: "UR" },
+                                            { value: "arabic", label: "AR" },
+                                            { value: "spanish", label: "ES" },
+                                        ].map((lang) => (
+                                            <button
+                                                key={lang.value}
+                                                type="button"
+                                                onClick={() => setOutputLanguage(lang.value)}
+                                                className={`px-3 py-1 text-[13px] font-mono border rounded-sm transition-all duration-200 ${
+                                                    outputLanguage === lang.value
+                                                        ? "border-[var(--text-primary)] text-[var(--text-primary)] bg-[var(--bg-subtle)] shadow-[2px_2px_0_0_var(--text-primary)]"
+                                                        : "border-[var(--border)] text-[var(--text-faint)] hover:border-[var(--text-muted)] hover:text-[var(--text-muted)]"
+                                                }`}
+                                            >
+                                                {lang.label}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
                                 <button
                                     type="submit"
                                     disabled={isLoading || !url}
@@ -275,7 +304,11 @@ export default function GeneratePage() {
                                     >
                                         <div className="w-10 h-10 border border-[var(--border)] border-t-[var(--text-primary)] rounded-full animate-spin" />
                                         <span className="font-mono text-[11px] uppercase tracking-[0.2em] text-[var(--text-faint)]">
-                                            Generating structured notes
+                                            {outputLanguage === "hindi" ? "नोट्स बन रहे हैं..." :
+                                             outputLanguage === "urdu" ? "...نوٹس بن رہے ہیں" :
+                                             outputLanguage === "arabic" ? "...جارٍ إنشاء الملاحظات" :
+                                             outputLanguage === "spanish" ? "Generando notas..." :
+                                             "Generating structured notes"}
                                         </span>
                                     </motion.div>
                                 ) : data ? (

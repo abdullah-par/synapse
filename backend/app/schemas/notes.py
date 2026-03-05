@@ -7,6 +7,7 @@ from pydantic import BaseModel
 
 class VideoRequest(BaseModel):
     url: str
+    output_language: str = "english"
 
 
 class NoteMetadata(BaseModel):

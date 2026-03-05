@@ -123,7 +123,7 @@ def _get_transcript_via_ytdlp(video_id: str) -> Optional[str]:
 
         # Look for English auto-captions or manual subs
         for subs_dict in [info.get("automatic_captions", {}), info.get("subtitles", {})]:
-            for lang_key in ["en", "en-US", "en-GB", "en-orig"]:
+            for lang_key in ["en", "en-US", "en-GB", "en-orig", "en-IN", "hi", "hi-IN"]:
                 formats = subs_dict.get(lang_key, [])
                 # Prefer json3, then srv1, then vtt
                 for preferred_ext in ["json3", "srv1", "vtt"]:
