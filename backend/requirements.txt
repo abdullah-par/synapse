@@ -8,4 +8,6 @@ youtube-transcript-api
 yt-dlp
 notion-client
 httpx
+sqlmodel
+psycopg2-binary
 tenacity

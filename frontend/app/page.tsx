@@ -329,7 +329,7 @@ function FeedbackForm({ onSubmitted }: { onSubmitted?: () => void }) {
         <button
           type="submit"
           disabled={!message.trim()}
-          className="btn-primary !rounded-lg !px-10 group/btn bg-[var(--text-primary)] !text-[var(--bg)] border-none shadow-[4px_4px_0_0_var(--accent)] active:translate-x-1 active:translate-y-1 active:shadow-none transition-all disabled:opacity-40"
+          className="btn-primary !rounded-[10px] !px-10 group/btn transition-all disabled:opacity-50"
         >
           {submitted ? "Sent!" : "Send Feedback"}
           <ArrowRight size={16} className="group-hover/btn:translate-x-1 transition-transform" />
