@@ -37,12 +37,12 @@ def _allow_vercel_previews(origin: str) -> bool:
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=_origins,
-    allow_origin_regex=r"https://.*\.vercel\.app",  # covers all Vercel preview deploys
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
 # Register routers
 app.include_router(health.router, tags=["Health"])
