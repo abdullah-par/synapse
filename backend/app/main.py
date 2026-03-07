@@ -12,30 +12,35 @@ app = FastAPI(
 )
 
 # ── CORS ──────────────────────────────────────────────────────────────────
-# Clean, explicit origins for production.
-# Wildcards with credentials are often blocked by browsers.
+# Using a clean list of allowed origins. 
+# 502 indicates a generic server failure, often caused by the middleware 
+# crashing or a timeout. Removing the regex to be safe.
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:3000",
-        "https://www.usesynaps.tech",
         "https://usesynaps.tech",
-        "https://www.usesynapse.tech",
+        "https://www.usesynaps.tech",
         "https://usesynapse.tech",
+        "https://www.usesynapse.tech",
         "https://synapse-kappa-opal.vercel.app",
         "https://synapse-production-9c44.up.railway.app",
     ],
-    allow_origin_regex=r"https://.*\.vercel\.app|https://.*\.usesynaps\.tech|https://.*\.usesynapse\.tech",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+@app.get("/test-cors")
+async def test_cors():
+    return {"message": "CORS is working"}
 
 # Register routers
 app.include_router(health.router, tags=["Health"])
 app.include_router(notes.router, tags=["Notes"])
 app.include_router(notion.router, tags=["Notion"])
 app.include_router(feedback.router, tags=["Feedback"])
+
 
 
 
