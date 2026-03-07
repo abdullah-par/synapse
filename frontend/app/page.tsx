@@ -52,94 +52,7 @@ function Section({ children, className = "", id }: { children: React.ReactNode; 
   );
 }
 
-/* ─── Sketchy Decorations ────────────────────────────────────────────────── */
-function SketchUnderline({ className = "" }: { className?: string }) {
-  return (
-    <svg
-      viewBox="0 0 200 20"
-      preserveAspectRatio="none"
-      className={`absolute left-0 -bottom-2 w-full h-3 text-[var(--accent)] opacity-60 pointer-events-none ${className}`}
-    >
-      <motion.path
-        d="M5,15 Q30,5 60,12 T110,15 T160,10 T195,14"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="3"
-        strokeLinecap="round"
-        initial={{ pathLength: 0 }}
-        whileInView={{ pathLength: 1 }}
-        viewport={{ once: true }}
-        transition={{ duration: 1.2, ease: "easeInOut" }}
-      />
-    </svg>
-  );
-}
-
-function SketchArrow({ className = "" }: { className?: string }) {
-  return (
-    <svg
-      viewBox="0 0 100 60"
-      fill="none"
-      stroke="currentColor"
-      className={`w-24 h-16 text-[var(--accent)] opacity-40 ${className}`}
-    >
-      <motion.path
-        d="M10,10 C40,5 60,20 70,50 M60,40 L70,50 L80,45"
-        strokeWidth="2.5"
-        strokeLinecap="round"
-        initial={{ pathLength: 0, opacity: 0 }}
-        whileInView={{ pathLength: 1, opacity: 1 }}
-        viewport={{ once: true }}
-        transition={{ duration: 1, delay: 0.5 }}
-      />
-    </svg>
-  );
-}
-
-function SketchLoop({ className = "" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 100 100" className={`absolute text-[var(--border)] opacity-20 pointer-events-none ${className}`}>
-      <motion.path
-        d="M20,50 C20,20 50,20 50,50 C50,80 80,80 80,50 C80,20 50,20 50,50"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1"
-        initial={{ pathLength: 0, scale: 0.8 }}
-        animate={{
-          pathLength: [0, 1, 1, 0],
-          rotate: [0, 5, -5, 0],
-          scale: [0.8, 1, 0.9, 0.8]
-        }}
-        transition={{
-          duration: 10,
-          repeat: Infinity,
-          ease: "linear"
-        }}
-      />
-    </svg>
-  );
-}
-
-function SketchHighlight({ className = "" }: { className?: string }) {
-  return (
-    <svg
-      viewBox="0 0 100 40"
-      fill="none"
-      stroke="currentColor"
-      className={`absolute inset-0 w-full h-full text-[var(--accent)] opacity-30 pointer-events-none -mx-2 -my-1 ${className}`}
-    >
-      <motion.path
-        d="M5,20 C5,5 95,5 95,20 C95,35 5,35 5,20"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        initial={{ pathLength: 0 }}
-        whileInView={{ pathLength: 1 }}
-        viewport={{ once: true }}
-        transition={{ duration: 1.5, ease: "easeInOut" }}
-      />
-    </svg>
-  );
-}
+import { SketchUnderline, SketchArrow, SketchLoop, SketchBox, SketchHighlight } from "@/components/decorations";
 
 /* ─── Fake UI Preview ─────────────────────────────────────────────────────── */
 function ProductPreview() {
@@ -329,10 +242,10 @@ function FeedbackForm({ onSubmitted }: { onSubmitted?: () => void }) {
         <button
           type="submit"
           disabled={!message.trim()}
-          className="btn-primary !rounded-[10px] !px-10 group/btn transition-all disabled:opacity-50"
+          className="inline-flex btn-primary text-[15px] !rounded-[10px] w-full sm:w-auto transition-all disabled:opacity-50"
         >
           {submitted ? "Sent!" : "Send Feedback"}
-          <ArrowRight size={16} className="group-hover/btn:translate-x-1 transition-transform" />
+          <ArrowRight size={15} strokeWidth={2.5} />
         </button>
       </div>
     </form>
@@ -431,8 +344,14 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen bg-[var(--bg)] overflow-x-hidden">
+    <main className="min-h-screen bg-[var(--bg)] overflow-x-hidden relative">
       <Navbar />
+
+      {/* Floating sketchy decorations for all pages feel */}
+      <SketchLoop className="w-[450px] h-[450px] top-20 -right-10 rotate-12" color="blue" />
+      <SketchLoop className="w-[550px] h-[550px] bottom-40 -left-60 -rotate-6" color="pink" />
+      <SketchBox className="w-[180px] h-[180px] top-[30%] left-[5%] rotate-12" color="orange" />
+      <SketchBox className="w-[220px] h-[220px] bottom-[15%] right-[10%] -rotate-12" color="purple" />
 
       {/* ── Hero ──────────────────────────────────────────────────────────── */}
       <section
@@ -440,9 +359,9 @@ export default function Home() {
         style={{ background: "var(--bg)" }}
       >
         {/* Background Sketch Decor */}
-        <SketchLoop className="w-[300px] h-[300px] -top-20 -left-10 rotate-12" />
-        <SketchLoop className="w-[400px] h-[400px] -bottom-40 -right-20 -rotate-12" />
-        <SketchArrow className="absolute top-1/4 right-[15%] hidden lg:block" />
+        <SketchLoop className="w-[300px] h-[300px] -top-20 -left-10 rotate-12" color="green" />
+        <SketchLoop className="w-[400px] h-[400px] -bottom-40 -right-20 -rotate-12" color="pink" />
+        <SketchArrow className="absolute top-1/4 right-[15%] hidden lg:block" color="orange" />
 
         <div className="page-shell relative z-10">
           <div className="flex flex-col lg:flex-row items-center gap-12 sm:gap-16 lg:gap-16">
@@ -505,7 +424,7 @@ export default function Home() {
                 custom={0.3}
                 className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 mb-12"
               >
-                <Link href="/generate" className="btn-primary text-[15px] w-full sm:w-auto justify-center">
+                <Link href="/generate" className="inline-flex btn-primary text-[15px] !rounded-[10px] w-full sm:w-auto justify-center">
                   Start for Free <ArrowRight size={15} strokeWidth={2.5} />
                 </Link>
                 <Link href="/how-it-works" className="btn-secondary text-[15px] w-full sm:w-auto justify-center">

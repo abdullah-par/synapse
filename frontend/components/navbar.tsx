@@ -62,7 +62,7 @@ export function Navbar() {
                         <ThemeToggle />
                         <Link
                             href="/generate"
-                            className="hidden md:inline-flex btn-primary text-[13px] py-2 px-4 rounded-[10px]"
+                            className="!hidden md:!inline-flex btn-primary text-[13px] py-2 px-4 !rounded-[10px]"
                         >
                             Try for Free <ArrowRight size={13} strokeWidth={2.5} />
                         </Link>
@@ -88,19 +88,28 @@ export function Navbar() {
                         transition={{ duration: 0.2, ease: "easeInOut" }}
                         className="fixed top-16 left-0 right-0 z-40 glass-nav border-b border-[var(--border)] overflow-hidden"
                     >
-                        <div className="page-shell py-4 flex flex-col gap-3">
-                            {navLinks.map((link) => (
-                                <Link
-                                    key={link.href}
-                                    href={link.href}
-                                    className="text-[13px] font-mono uppercase tracking-wide font-semibold text-[var(--text-muted)] hover:text-[var(--text-primary)] py-2 transition-colors"
-                                    onClick={() => setMobileOpen(false)}
-                                >
-                                    {link.label}
-                                </Link>
-                            ))}
-                            <Link href="/generate" className="btn-primary text-[14px] mt-2 justify-center">
-                                Try for Free <ArrowRight size={14} />
+                        <div className="page-shell py-4 flex flex-col gap-4">
+                            <div className="flex items-center justify-between mb-2">
+                                <span className="text-[11px] font-mono uppercase tracking-[0.2em] text-[var(--text-faint)]">Menu</span>
+                            </div>
+                            <div className="flex flex-col gap-3">
+                                {navLinks.map((link) => (
+                                    <Link
+                                        key={link.href}
+                                        href={link.href}
+                                        className="text-[13px] font-mono uppercase tracking-wide font-semibold text-[var(--text-muted)] hover:text-[var(--text-primary)] py-2 transition-colors"
+                                        onClick={() => setMobileOpen(false)}
+                                    >
+                                        {link.label}
+                                    </Link>
+                                ))}
+                            </div>
+                            <Link
+                                href="/generate"
+                                className="inline-flex btn-primary text-[14px] !rounded-[10px] mt-2 justify-center"
+                                onClick={() => setMobileOpen(false)}
+                            >
+                                Try for Free <ArrowRight size={14} strokeWidth={2.5} />
                             </Link>
                         </div>
                     </motion.div>

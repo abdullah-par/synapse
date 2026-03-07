@@ -13,58 +13,17 @@ const fadeUp: any = {
     }),
 };
 
-function SketchUnderline({ className = "" }: { className?: string }) {
-    return (
-        <svg
-            viewBox="0 0 200 20"
-            preserveAspectRatio="none"
-            className={`absolute left-0 -bottom-2 w-full h-3 text-[var(--accent)] opacity-60 pointer-events-none ${className}`}
-        >
-            <motion.path
-                d="M5,15 Q30,5 60,12 T110,15 T160,10 T195,14"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="3"
-                strokeLinecap="round"
-                initial={{ pathLength: 0 }}
-                animate={{ pathLength: 1 }}
-                transition={{ duration: 1.2, ease: "easeInOut", delay: 0.5 }}
-            />
-        </svg>
-    );
-}
-
-function SketchLoop({ className = "" }: { className?: string }) {
-    return (
-        <svg viewBox="0 0 100 100" className={`absolute text-[var(--border)] opacity-20 pointer-events-none ${className}`}>
-            <motion.path
-                d="M20,50 C20,20 50,20 50,50 C50,80 80,80 80,50 C80,20 50,20 50,50"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                initial={{ pathLength: 0, scale: 0.8 }}
-                animate={{
-                    pathLength: [0, 1, 1, 0],
-                    rotate: [0, 5, -5, 0],
-                    scale: [0.8, 1, 0.9, 0.8]
-                }}
-                transition={{
-                    duration: 15,
-                    repeat: Infinity,
-                    ease: "linear"
-                }}
-            />
-        </svg>
-    );
-}
+import { SketchUnderline, SketchLoop, SketchBox } from "@/components/decorations";
 
 export default function PhilosophyPage() {
     return (
         <main className="min-h-screen bg-[var(--bg)] selection:bg-[var(--accent-soft)] selection:text-[var(--text-primary)] overflow-hidden relative">
             {/* Background Texture & Decor */}
             <div className="absolute inset-0 z-0 pointer-events-none opacity-[0.03] hero-noise mix-blend-overlay" />
-            <SketchLoop className="w-[500px] h-[500px] -top-20 -right-20 rotate-12" />
-            <SketchLoop className="w-[600px] h-[600px] -bottom-40 -left-60 -rotate-6" />
+            <SketchLoop className="w-[400px] h-[400px] top-20 -right-20 rotate-12" color="blue" />
+            <SketchLoop className="w-[500px] h-[500px] bottom-40 -left-60 -rotate-6" color="pink" />
+            <SketchBox className="w-[150px] h-[150px] top-[40%] left-[2%] rotate-12" color="orange" />
+            <SketchBox className="w-[200px] h-[200px] bottom-[20%] right-[5%] -rotate-12" color="purple" />
 
             <div className="relative z-10">
                 <Navbar />
@@ -87,12 +46,12 @@ export default function PhilosophyPage() {
                         initial="hidden"
                         animate="show"
                         custom={0.1}
-                        className="text-[clamp(36px,5vw,72px)] font-light leading-[1.05] tracking-[-0.03em] text-[var(--text-primary)] mb-10 sm:mb-16 font-[var(--font-sans)]"
+                        className="text-[clamp(40px,6vw,80px)] font-bold leading-[1] tracking-[-0.04em] text-[var(--text-primary)] mb-12 sm:mb-20"
                     >
                         A tool for <br />
-                        <span className="italic font-[var(--font-serif)] relative inline-block">
+                        <span className="italic font-light relative inline-block" style={{ fontFamily: "var(--font-serif)" }}>
                             intentional learning.
-                            <SketchUnderline />
+                            <SketchUnderline color="green" />
                         </span>
                     </motion.h1>
 
@@ -103,29 +62,29 @@ export default function PhilosophyPage() {
                         custom={0.2}
                         className="space-y-16"
                     >
-                        <div className="space-y-4">
-                            <h2 className="font-mono text-[10px] uppercase tracking-[0.15em] text-[var(--text-faint)]">
+                        <div className="space-y-6">
+                            <h2 className="font-mono text-[11px] font-bold uppercase tracking-[0.2em] text-[var(--text-faint)]">
                                 The Problem
                             </h2>
-                            <p className="text-[16px] font-normal leading-[1.8] text-[var(--text-muted)]">
+                            <p className="text-[17px] font-normal leading-[1.8] text-[var(--text-muted)] max-w-[640px]">
                                 We live in an age of information abundance and wisdom scarcity. YouTube is the world&apos;s largest library, yet most of its knowledge remains locked in linear, unsearchable video streams. We &quot;watch&quot; but we don&apos;t always &quot;know.&quot;
                             </p>
                         </div>
 
-                        <div className="space-y-4">
-                            <h2 className="font-mono text-[10px] uppercase tracking-[0.15em] text-[var(--text-faint)]">
+                        <div className="space-y-6">
+                            <h2 className="font-mono text-[11px] font-bold uppercase tracking-[0.2em] text-[var(--text-faint)]">
                                 The Vision
                             </h2>
-                            <p className="text-[16px] font-normal leading-[1.8] text-[var(--text-muted)]">
+                            <p className="text-[17px] font-normal leading-[1.8] text-[var(--text-muted)] max-w-[640px]">
                                 Synapse is the bridge. It is not just about transcription; it is about distillation. Our goal is to transform passive consumption into active knowledge building. By externalizing the core concepts of a video into structured, typographic notes, we free your brain to do what it does best: connect ideas.
                             </p>
                         </div>
 
-                        <div className="space-y-4">
-                            <h2 className="font-mono text-[10px] uppercase tracking-[0.15em] text-[var(--text-faint)]">
+                        <div className="space-y-6">
+                            <h2 className="font-mono text-[11px] font-bold uppercase tracking-[0.2em] text-[var(--text-faint)]">
                                 The Aesthetic
                             </h2>
-                            <p className="text-[16px] font-normal leading-[1.8] text-[var(--text-muted)]">
+                            <p className="text-[17px] font-normal leading-[1.8] text-[var(--text-muted)] max-w-[640px]">
                                 Our &quot;Paper Minimalism&quot; design is a statement. We reject the dopamine-driven, cluttered interfaces of modern web apps. We believe a tool for the mind should look like a blank page—ready for your focus.
                             </p>
                         </div>

@@ -49,53 +49,7 @@ function Section({
 }
 
 /* ─── Sketchy Decorations ────────────────────────────────────────────────── */
-function SketchUnderline({ className = "" }: { className?: string }) {
-  return (
-    <svg
-      viewBox="0 0 200 20"
-      preserveAspectRatio="none"
-      className={`absolute left-0 -bottom-2 w-full h-3 text-[var(--accent)] opacity-60 pointer-events-none ${className}`}
-    >
-      <motion.path
-        d="M5,15 Q30,5 60,12 T110,15 T160,10 T195,14"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="3"
-        strokeLinecap="round"
-        initial={{ pathLength: 0 }}
-        animate={{ pathLength: 1 }}
-        transition={{ duration: 1.2, ease: "easeInOut", delay: 0.5 }}
-      />
-    </svg>
-  );
-}
-
-function SketchLoop({ className = "" }: { className?: string }) {
-  return (
-    <svg
-      viewBox="0 0 100 100"
-      className={`absolute text-[var(--border)] opacity-20 pointer-events-none ${className}`}
-    >
-      <motion.path
-        d="M20,50 C20,20 50,20 50,50 C50,80 80,80 80,50 C80,20 50,20 50,50"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        initial={{ pathLength: 0, scale: 0.8 }}
-        animate={{
-          pathLength: [0, 1, 1, 0],
-          rotate: [0, 5, -5, 0],
-          scale: [0.8, 1, 0.9, 0.8],
-        }}
-        transition={{
-          duration: 15,
-          repeat: Infinity,
-          ease: "linear",
-        }}
-      />
-    </svg>
-  );
-}
+import { SketchUnderline, SketchLoop, SketchBox } from "@/components/decorations";
 
 /* ─── Timeline connector line ─────────────────────────────────────────────── */
 function TimelineConnector() {
@@ -124,7 +78,7 @@ export default function HowItWorksPage() {
         "Automatic language detection",
         "Falls back to subtitle extraction if needed",
       ],
-      accent: "var(--mac-red)",
+      accent: "var(--text-muted)",
     },
     {
       step: "02",
@@ -158,8 +112,11 @@ export default function HowItWorksPage() {
     <main className="min-h-screen bg-[var(--bg)] selection:bg-[var(--accent-soft)] selection:text-[var(--text-primary)] overflow-hidden relative">
       {/* Background decor */}
       <div className="absolute inset-0 z-0 pointer-events-none opacity-[0.03] hero-noise mix-blend-overlay" />
-      <SketchLoop className="w-[500px] h-[500px] -top-20 -right-20 rotate-12" />
-      <SketchLoop className="w-[600px] h-[600px] -bottom-40 -left-60 -rotate-6" />
+      <SketchLoop className="w-[450px] h-[450px] top-20 -right-10 rotate-12" color="blue" />
+      <SketchLoop className="w-[550px] h-[550px] bottom-40 -left-40 -rotate-6" color="pink" />
+      <SketchLoop className="w-[300px] h-[300px] top-[40%] right-[15%] rotate-45" color="orange" />
+      <SketchBox className="w-[200px] h-[200px] top-[25%] left-[5%] rotate-6" color="purple" />
+      <SketchBox className="w-[250px] h-[250px] bottom-[20%] right-[5%] -rotate-12" color="green" />
 
       <div className="relative z-10">
         <Navbar />
@@ -250,9 +207,8 @@ export default function HowItWorksPage() {
                         delay: 0.1,
                         ease: [0.25, 0.1, 0.25, 1],
                       }}
-                      className={`relative flex flex-col md:flex-row items-center gap-8 md:gap-16 ${
-                        isEven ? "" : "md:flex-row-reverse"
-                      }`}
+                      className={`relative flex flex-col md:flex-row items-center gap-8 md:gap-16 ${isEven ? "" : "md:flex-row-reverse"
+                        }`}
                     >
                       {/* Step number badge (center on desktop) */}
                       <div className="hidden md:flex absolute left-1/2 -translate-x-1/2 z-10 w-14 h-14 rounded-full border-[2px] border-[var(--text-primary)] bg-[var(--bg)] shadow-[4px_4px_0_0_var(--text-primary)] items-center justify-center">
@@ -263,9 +219,8 @@ export default function HowItWorksPage() {
 
                       {/* Content card */}
                       <div
-                        className={`flex-1 ${
-                          isEven ? "md:pr-16 md:text-right" : "md:pl-16 md:text-left"
-                        }`}
+                        className={`flex-1 ${isEven ? "md:pr-16 md:text-right" : "md:pl-16 md:text-left"
+                          }`}
                       >
                         {/* Mobile step badge */}
                         <div className="flex md:hidden items-center gap-3 mb-4">
@@ -279,23 +234,12 @@ export default function HowItWorksPage() {
                           <div className="h-[1px] flex-1 bg-[var(--border)]" />
                         </div>
 
-                        <div
-                          className="saas-card !p-8 md:!p-10"
-                          style={{
-                            borderColor: `color-mix(in srgb, ${item.accent} 25%, var(--border))`,
-                          }}
-                        >
+                        <div className="saas-card !p-8 md:!p-10">
                           <div
-                            className={`flex items-center gap-3 mb-5 ${
-                              isEven ? "md:justify-end" : ""
-                            }`}
+                            className={`flex items-center gap-3 mb-5 ${isEven ? "md:justify-end" : ""
+                              }`}
                           >
-                            <div
-                              className="icon-box"
-                              style={{
-                                borderColor: `color-mix(in srgb, ${item.accent} 40%, var(--border))`,
-                              }}
-                            >
+                            <div className="icon-box">
                               {item.icon}
                             </div>
                             <h3 className="text-[20px] sm:text-[22px] font-bold text-[var(--text-primary)] tracking-[-0.02em]">
@@ -308,16 +252,14 @@ export default function HowItWorksPage() {
                           </p>
 
                           <ul
-                            className={`space-y-3 ${
-                              isEven ? "md:text-right" : ""
-                            }`}
+                            className={`space-y-3 ${isEven ? "md:text-right" : ""
+                              }`}
                           >
                             {item.details.map((detail) => (
                               <li
                                 key={detail}
-                                className={`flex items-center gap-2.5 text-[14px] text-[var(--text-muted)] ${
-                                  isEven ? "md:flex-row-reverse" : ""
-                                }`}
+                                className={`flex items-center gap-2.5 text-[14px] text-[var(--text-muted)] ${isEven ? "md:flex-row-reverse" : ""
+                                  }`}
                               >
                                 <CheckCircle2
                                   size={15}
@@ -506,7 +448,7 @@ export default function HowItWorksPage() {
               </p>
               <Link
                 href="/generate"
-                className="btn-primary text-[15px] inline-flex mx-auto"
+                className="inline-flex btn-primary text-[15px] mx-auto"
               >
                 Generate Notes Now{" "}
                 <ArrowRight size={15} strokeWidth={2.5} />
