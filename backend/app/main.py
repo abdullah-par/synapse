@@ -12,29 +12,31 @@ app = FastAPI(
 )
 
 # ── CORS ──────────────────────────────────────────────────────────────────
-# Force-allow all origins without credentials. This is the most compatible 
-# CORS configuration for cloud environments where headers might be stripped.
+# Clean, explicit origins for production.
+# Wildcards with credentials are often blocked by browsers.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=False,
+    allow_origins=[
+        "http://localhost:3000",
+        "https://www.usesynaps.tech",
+        "https://usesynaps.tech",
+        "https://www.usesynapse.tech",
+        "https://usesynapse.tech",
+        "https://synapse-kappa-opal.vercel.app",
+        "https://synapse-production-9c44.up.railway.app",
+    ],
+    allow_origin_regex=r"https://.*\.vercel\.app|https://.*\.usesynaps\.tech|https://.*\.usesynapse\.tech",
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-# Explicit OPTIONS handler as a safety net for prelight requests
-@app.options("/{path:path}")
-async def preflight_handler():
-    return {}
-
-
-
 
 # Register routers
 app.include_router(health.router, tags=["Health"])
 app.include_router(notes.router, tags=["Notes"])
 app.include_router(notion.router, tags=["Notion"])
 app.include_router(feedback.router, tags=["Feedback"])
+
 
 
 if __name__ == "__main__":
