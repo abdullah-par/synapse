@@ -12,37 +12,21 @@ app = FastAPI(
 )
 
 # ── CORS ──────────────────────────────────────────────────────────────────
-# Fixed origins we always trust
-_origins = [
-    "http://localhost:3000",
-    "https://synapse-kappa-opal.vercel.app",
-    "https://www.usesynaps.tech",
-    "https://usesynaps.tech",
-    "https://www.usesynapse.tech",
-    "https://usesynapse.tech",
-    "https://synapse-production-9c44.up.railway.app"
-]
-# Add whatever the deploy platform sets as FRONTEND_URL
-if settings.frontend_url and settings.frontend_url not in _origins:
-    _origins.append(settings.frontend_url)
-
-# Filter out empty strings
-_origins = [o for o in _origins if o]
-
-
-def _allow_vercel_previews(origin: str) -> bool:
-    """Allow any *.vercel.app preview deploy automatically."""
-    return origin.endswith(".vercel.app")
-
-
+# Force-allow all origins without credentials. This is the most compatible 
+# CORS configuration for cloud environments where headers might be stripped.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=_origins,
-    allow_origin_regex=r"https://.*\.vercel\.app|https://.*\.usesynaps\.tech|https://.*\.usesynapse\.tech",
-    allow_credentials=True,
+    allow_origins=["*"],
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Explicit OPTIONS handler as a safety net for prelight requests
+@app.options("/{path:path}")
+async def preflight_handler():
+    return {}
+
 
 
 
