@@ -183,9 +183,62 @@ def _fetch_and_parse_subtitle(url: str, ext: str) -> Optional[str]:
         return None
 
 
-def get_transcript(video_id: str) -> str:
+def get_transcript_assemblyai(video_url: str) -> str:
+    """
+    Fallback transcript method using AssemblyAI speech-to-text.
+    Only called when both youtube-transcript-api and yt-dlp subtitle
+    extraction have already failed.
+
+    Flow:
+      1. Extract a direct audio stream URL from YouTube via yt-dlp
+         (no file is downloaded — we pass the streaming URL directly)
+      2. Submit that URL to AssemblyAI for transcription
+      3. Poll until complete and return the full transcript text
+    """
+    import assemblyai as aai
+
+    if not settings.assemblyai_api_key:
+        raise ValueError(
+            "AssemblyAI API key not configured. "
+            "Set ASSEMBLYAI_API_KEY in your environment variables."
+        )
+
+    # Step 1: Get a direct audio stream URL — do NOT download the file
+    ydl_opts = {
+        "format": "bestaudio/best",
+        "quiet": True,
+        "no_warnings": True,
+        **_YDL_PROXY,
+    }
+    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+        info = ydl.extract_info(video_url, download=False)
+        audio_url = info["url"]
+
+    # Step 2: Transcribe via AssemblyAI
+    aai.settings.api_key = settings.assemblyai_api_key
+    config = aai.TranscriptionConfig(
+        speech_model=aai.SpeechModel.best,
+        language_detection=True,  # auto-detects Hindi, English, etc.
+    )
+    transcriber = aai.Transcriber(config=config)
+    transcript = transcriber.transcribe(audio_url)
+
+    if transcript.status == aai.TranscriptStatus.error:
+        raise Exception(f"AssemblyAI transcription failed: {transcript.error}")
+
+    return transcript.text
+
+
+def get_transcript(video_id: str) -> tuple[str, str]:
     """
     Fetch and clean transcript text.
+    Returns a tuple of (clean_transcript_text, source) where source is
+    either 'captions' (YouTube captions) or 'assemblyai'.
+
+    Attempt order:
+      1. youtube-transcript-api  (fastest, free)
+      2. yt-dlp subtitle extraction  (fallback for IP-blocked regions)
+      3. AssemblyAI audio transcription  (final fallback for caption-free videos)
 
     Cleaning steps:
     - Join all transcript segments into a single string
@@ -194,14 +247,16 @@ def get_transcript(video_id: str) -> str:
     - Return full transcript (chunking handled by the AI service layer)
     """
     raw_text = None
+    transcript_source = "captions"
     _ytt_error = None
 
+    # ── Method 1: youtube-transcript-api ──────────────────────────────────
     try:
         ytt_api = YouTubeTranscriptApi()
         transcript = ytt_api.fetch(video_id)
         raw_text = " ".join(snippet.text for snippet in transcript.snippets)
     except TranscriptsDisabled:
-        _ytt_error = ("transcript_disabled", "Captions are disabled for this video. Try a video with auto-generated subtitles.")
+        _ytt_error = ("transcript_disabled", "Captions are disabled for this video.")
     except NoTranscriptFound:
         _ytt_error = ("transcript_unavailable", "No English transcript found for this video.")
     except VideoUnavailable:
@@ -216,29 +271,50 @@ def get_transcript(video_id: str) -> str:
         # Primary method failed (likely IP block) — will try yt-dlp next
         _ytt_error = ("transcript_error", "Primary transcript fetch failed.")
 
-    # If youtube-transcript-api failed or returned nothing, try yt-dlp subtitles
+    # ── Method 2: yt-dlp subtitle extraction ──────────────────────────────
     if not raw_text:
         raw_text = _get_transcript_via_ytdlp(video_id)
 
+    # ── Method 3: AssemblyAI audio transcription (final fallback) ─────────
     if not raw_text:
-        # Both methods failed — surface the original error or a generic one
+        try:
+            video_url = f"https://www.youtube.com/watch?v={video_id}"
+            raw_text = get_transcript_assemblyai(video_url)
+            transcript_source = "assemblyai"
+        except ValueError as exc:
+            # AssemblyAI key not configured — surface that clearly
+            raise HTTPException(
+                status_code=500,
+                detail={
+                    "error": "assemblyai_not_configured",
+                    "message": str(exc),
+                },
+            ) from exc
+        except Exception:
+            # AssemblyAI also failed — fall through to final error
+            raw_text = None
+
+    # ── All three methods failed ───────────────────────────────────────────
+    if not raw_text:
         err_code, err_msg = _ytt_error or ("transcript_error", "Could not fetch transcript.")
         raise HTTPException(
             status_code=404 if err_code != "transcript_error" else 500,
             detail={
                 "error": err_code,
-                "message": err_msg + " (yt-dlp fallback also failed)",
+                "message": "No transcript available for this video. "
+                           "YouTube captions, yt-dlp subtitles, and AssemblyAI "
+                           "audio transcription all failed.",
             },
         )
 
-    # Clean annotation tags like [Music], [Applause]
+    # ── Clean the transcript ───────────────────────────────────────────────
+    # Remove annotation tags like [Music], [Applause]
     clean_text = re.sub(r"\[.*?]", "", raw_text)
 
     # Normalize whitespace
     clean_text = " ".join(clean_text.split())
 
-    # Return full transcript — chunking is handled by the AI service layer
-    return clean_text
+    return clean_text, transcript_source
 
 
 def chunk_transcript(text: str, chunk_size: int = 35000, overlap: int = 1000) -> list:

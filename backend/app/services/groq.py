@@ -17,42 +17,58 @@ MODEL = "llama-3.3-70b-versatile"
 
 # ── System prompts ────────────────────────────────────────────────────────
 
-SYSTEM_PROMPT = """You are an expert educational content synthesizer. 
-Your job is to transform raw YouTube video transcripts into structured, 
-professional study notes.
+SYSTEM_PROMPT = """You are an expert study note generator for students.
+Your job is to convert a video transcript into complete, detailed study notes.
+The student should be able to learn EVERYTHING from your notes without watching the video.
 
-You ALWAYS respond with valid JSON only. 
+You ALWAYS respond with valid JSON only.
 No markdown. No explanation. No code fences. Just the raw JSON object.
 
-Rules for your output:
-- Remove ALL verbal filler: um, uh, you know, like, basically, literally, right, okay
-- Rewrite conversational language into clear, concise prose
-- Preserve all technical accuracy — never simplify technical terms
-- Detect and preserve any code that appears in the transcript
-- Estimate timestamps based on position in transcript (beginning = ~0:00, middle = ~50% of duration, etc.)
+Your notes MUST include:
+- A brief overview (2-3 sentences) of what the video teaches
+- Every concept explained in full, not just named
+- All definitions of new terms introduced
+- Every example, analogy, and demonstration explained
+- All code shown or explained, in proper code blocks
+- Step-by-step breakdowns of any processes or tutorials
+- Timestamps for every major topic change
+- A Key Takeaways section at the end
+- 5 review questions a student can use to test themselves
+
+NEVER:
+- Skip content because it seems minor or repetitive
+- Write vague summaries like 'the speaker explains X'
+- Omit examples or analogies from the transcript
 """
 
-CHUNK_SYSTEM_PROMPT = """You are an expert educational content synthesizer.
+CHUNK_SYSTEM_PROMPT = """You are an expert study note generator for students.
 You are processing ONE SECTION of a longer video transcript.
 You ALWAYS respond with valid JSON only — no markdown, no explanation, no code fences.
 
-Rules:
-- Remove ALL verbal filler: um, uh, you know, like, basically, literally, right, okay
-- Rewrite conversational language into clear, concise prose
-- Preserve all technical accuracy — never simplify technical terms
-- Detect and preserve any code that appears in the transcript
+For this section you MUST:
+- Explain every concept introduced in full detail
+- Include every example, analogy, and demonstration
+- Capture all code shown or described (in code blocks)
+- Define every new term that appears
+- NEVER write vague summaries like 'the speaker explains X'
 """
 
-MERGE_SYSTEM_PROMPT = """You are an expert educational content editor.
-You merge and clean notes that were generated from multiple sections of a long video.
+MERGE_SYSTEM_PROMPT = """You are an expert study note editor for students.
+You merge notes generated from multiple sections of a long video into a single,
+complete set of student-grade study notes.
 You ALWAYS respond with valid JSON only — no markdown, no explanation, no code fences.
 
 Rules:
 - Remove duplicate or near-duplicate content
-- Ensure a smooth logical flow from section to section
-- Add an overview heading at the top
-- Add a key takeaways bullet block at the end
+- Ensure logical, chronological flow from section to section
+- Add a 2-3 sentence overview paragraph at the very top
+- Consolidate ALL definitions into a single Definitions section near the end
+- Add a Key Takeaways bullet block (5-7 points) near the end
+- Add exactly 5 review questions as question blocks at the very end
+- Preserve ALL code blocks exactly as they are
+- NEVER skip content or write vague summaries
 """
+
 
 
 # ── Helpers ───────────────────────────────────────────────────────────────
@@ -82,7 +98,7 @@ Duration: {duration}
 Transcript:
 {transcript}
 
-Transform this transcript into structured study notes using this EXACT JSON schema.
+Transform this transcript into complete student-grade study notes using this EXACT JSON schema.
 Do not add any fields. Do not remove any fields. Match the schema exactly.
 {_build_language_instruction(output_language)}
 {{
@@ -92,32 +108,38 @@ Do not add any fields. Do not remove any fields. Match the schema exactly.
     "duration": "duration as given"
   }},
   "blocks": [
-    // Use these block types in natural order as they appear in the content:
-    
-    // HEADING — for major topic sections (use 4-8 headings total)
+    // HEADING — for major topic sections
     {{ "type": "heading", "content": "Section Title" }},
-    
-    // PARAGRAPH — for explanations and concepts (2-4 sentences each)
-    {{ "type": "paragraph", "content": "Detailed explanation of the concept..." }},
-    
-    // BULLET — for lists, steps, key points (3-6 items per bullet block)
-    {{ "type": "bullet", "items": ["Point one", "Point two", "Point three"] }},
-    
-    // CODE — only when actual code appears in the transcript
+
+    // PARAGRAPH — full explanations (3-5 sentences, not summaries)
+    {{ "type": "paragraph", "content": "Detailed explanation of the concept with all nuances..." }},
+
+    // BULLET — steps, key points, comparisons (3-8 items per block)
+    {{ "type": "bullet", "items": ["Point one with full detail", "Point two", "Point three"] }},
+
+    // CODE — every snippet shown or described in the video
     {{ "type": "code", "language": "python", "content": "def hello():\\n    print('hello')" }},
-    
-    // TIMESTAMP — for key moments (include 4-8 timestamps)
-    {{ "type": "timestamp", "time": "02:15", "topic": "Topic being discussed at this time" }}
+
+    // TIMESTAMP — one per major topic change (include 4-8 total)
+    {{ "type": "timestamp", "time": "02:15", "topic": "Topic being discussed at this time" }},
+
+    // DEFINITION — every new term introduced must be defined
+    {{ "type": "definition", "term": "API", "explanation": "A set of rules that allows one program to talk to another..." }},
+
+    // QUESTION — exactly 5 self-test questions at the end
+    {{ "type": "question", "number": 1, "text": "What is X and why does it matter?" }}
   ]
 }}
 
-Important:
-- Start with a "heading" block for an Overview section
-- End with a "bullet" block summarizing key takeaways
-- Include timestamps distributed throughout (not all at the end)
-- If no code appears in the transcript, include zero code blocks
-- Minimum 12 blocks total, maximum 30 blocks
+Required structure (in order):
+1. An "overview" paragraph block (2-3 sentences summarising what the video teaches)
+2. Topic sections: for each major topic — heading → timestamp → paragraphs → bullets → code → definitions
+3. A heading called "Key Takeaways" followed by one bullet block with 5-7 items
+4. A heading called "Review Questions" followed by exactly 5 question blocks (numbered 1-5)
+
+Minimum 20 blocks total. Capture EVERY concept, example, analogy, and code snippet.
 """
+
 
 
 def _build_chunk_prompt(
@@ -134,24 +156,29 @@ Duration: {duration}
 Transcript section:
 {chunk}
 
-Generate structured notes for THIS SECTION ONLY using this JSON schema:
+Generate complete student-grade notes for THIS SECTION ONLY using this JSON schema:
 {_build_language_instruction(output_language)}
 {{
   "blocks": [
     {{ "type": "heading", "content": "Section Title" }},
-    {{ "type": "paragraph", "content": "Explanation..." }},
-    {{ "type": "bullet", "items": ["Point one", "Point two"] }},
+    {{ "type": "paragraph", "content": "Full explanation — not a summary..." }},
+    {{ "type": "bullet", "items": ["Detailed point one", "Detailed point two"] }},
     {{ "type": "code", "language": "python", "content": "code here" }},
-    {{ "type": "timestamp", "time": "MM:SS", "topic": "Topic" }}
+    {{ "type": "timestamp", "time": "MM:SS", "topic": "Topic" }},
+    {{ "type": "definition", "term": "Term", "explanation": "Full definition..." }}
   ]
 }}
 
-Important:
-- Do NOT add an overview or conclusion — just note the content from this section
-- Use 4-12 blocks for this section
+Rules:
+- Explain every concept in full — do NOT just name it or write 'the speaker explains X'
+- Include every example, analogy, and demonstration from the transcript
+- Capture every code snippet shown or described
+- Add a definition block for every new term introduced
+- Do NOT add overview or review questions — those go in the final merge
+- Use 8-20 blocks for this section
 - Include timestamps relative to this part of the video
-- If no code appears, use zero code blocks
 """
+
 
 
 def _build_merge_prompt(
@@ -169,7 +196,7 @@ Video: {title} by {channel} ({duration})
 Here are all the note blocks collected from processing the full transcript in sections:
 {blocks_json}
 
-Create a final clean JSON response:
+Create a final clean, student-grade JSON response:
 {_build_language_instruction(output_language)}
 {{
   "metadata": {{
@@ -180,14 +207,21 @@ Create a final clean JSON response:
   "blocks": [ ... ]
 }}
 
-Rules:
-- Add an overview heading + paragraph at the very top
-- Keep all unique content blocks in chronological order
+Required structure (in this order):
+1. A paragraph block with a 2-3 sentence overview of what the video teaches
+2. All topic sections in chronological order (heading → timestamp → paragraphs → bullets → code)
+3. A heading "Definitions" followed by all definition blocks from all sections (deduplicated)
+4. A heading "Key Takeaways" followed by one bullet block with 5-7 items
+5. A heading "Review Questions" followed by exactly 5 question blocks:
+   {{ "type": "question", "number": 1, "text": "What is X and why does it matter?" }}
+
+Additional rules:
+- Preserve ALL code blocks exactly
 - Remove duplicate or near-duplicate headings/paragraphs
-- Add a "key takeaways" bullet block at the very end
-- Minimum 15 blocks, maximum 40 blocks
-- Preserve ALL code blocks exactly as they are
+- Total blocks: minimum 20, maximum 50
+- NEVER write vague summaries like 'the speaker explains X'
 """
+
 
 
 # ── Groq API call ─────────────────────────────────────────────────────────
@@ -198,7 +232,7 @@ def _call_groq(system_prompt: str, user_prompt: str) -> Dict:
     try:
         chat_completion = client.chat.completions.create(
             model=MODEL,
-            max_tokens=4096,
+            max_tokens=8192,
             temperature=0.3,
             response_format={"type": "json_object"},
             messages=[

@@ -9,6 +9,7 @@ class Settings(BaseSettings):
     environment: str = "development"
     proxy_url: str = ""  # Optional HTTPS proxy for YouTube requests (e.g. socks5://...)
     port: int = 8000  # PORT env var on Render
+    assemblyai_api_key: str = ""  # Optional — fallback STT when YouTube captions are unavailable
 
     class Config:
         env_file = ".env"

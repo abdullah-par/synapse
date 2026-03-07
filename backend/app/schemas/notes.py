@@ -43,11 +43,35 @@ class TimestampBlock(BaseModel):
     topic: str
 
 
-NoteBlock = Union[HeadingBlock, ParagraphBlock, BulletBlock, CodeBlock, TimestampBlock]
+class DefinitionBlock(BaseModel):
+    """A new term introduced in the video with its full definition."""
+    type: str = "definition"
+    term: str
+    explanation: str
+
+
+class QuestionBlock(BaseModel):
+    """A self-test review question at the end of the notes."""
+    type: str = "question"
+    number: int
+    text: str
+
+
+NoteBlock = Union[
+    HeadingBlock,
+    ParagraphBlock,
+    BulletBlock,
+    CodeBlock,
+    TimestampBlock,
+    DefinitionBlock,
+    QuestionBlock,
+]
 
 
 class GeneratedNotesResponse(BaseModel):
     metadata: NoteMetadata
     # Use dict for flexible block shapes while still validating metadata
     blocks: List[Dict[str, Any]]
+    # "captions" = YouTube captions, "assemblyai" = AssemblyAI audio transcription
+    transcript_source: str = "captions"
 

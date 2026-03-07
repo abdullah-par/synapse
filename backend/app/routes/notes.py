@@ -14,9 +14,9 @@ async def generate_notes_endpoint(request: VideoRequest):
     1. Parse and validate YouTube URL
     2. Extract video ID
     3. Fetch metadata (title, channel, duration) via yt-dlp
-    4. Fetch and clean transcript via YouTube Transcript API
+    4. Fetch transcript — tries YouTube captions → yt-dlp subtitles → AssemblyAI
     5. Send to Groq for structured note generation (with chunking for long videos)
-    6. Return the parsed blocks to the frontend
+    6. Return the parsed blocks + transcript_source flag to the frontend
     """
 
     # Step 1: Extract video ID (raises 422 if invalid URL)
@@ -25,8 +25,9 @@ async def generate_notes_endpoint(request: VideoRequest):
     # Step 2: Fetch metadata (never blocks — returns fallbacks on failure)
     metadata = get_video_metadata(video_id)
 
-    # Step 3: Fetch transcript (raises 404 if unavailable)
-    transcript = get_transcript(video_id)
+    # Step 3: Fetch transcript — returns (text, source) tuple
+    # source is "captions" or "assemblyai"
+    transcript, transcript_source = get_transcript(video_id)
 
     # Step 4: Generate notes with Groq (auto-chunks long transcripts)
     result = generate_notes(
@@ -40,6 +41,10 @@ async def generate_notes_endpoint(request: VideoRequest):
     # Step 5: Ensure metadata in response matches what we fetched
     # (AI may hallucinate different metadata — override with real values)
     result["metadata"] = metadata
+
+    # Step 6: Tell the frontend which transcript method was used
+    # Frontend uses this to show the appropriate loading / info message
+    result["transcript_source"] = transcript_source
 
     return result
 

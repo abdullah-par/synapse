@@ -11,3 +11,4 @@ httpx
 sqlmodel
 psycopg2-binary
 tenacity
+assemblyai==0.33.0
