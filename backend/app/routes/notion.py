@@ -104,7 +104,7 @@ def build_notion_blocks(blocks: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
                             },
                             {
                                 "type": "text",
-                                "text": {"content": block.get("topic", "")},
+                                "text": {"content": block.get('topic', '')},
                             },
                         ]
                     },
@@ -239,8 +239,6 @@ async def save_to_notion(request: NotionSaveRequest) -> NotionSaveResponse:
             status_code=502,
             detail={
                 "error": "notion_save_failed",
-                "message": "Failed to save to Notion. Check your integration token.",
-                "detail": str(exc),
+                "message": "We couldn't save to your Notion workspace. Please check your integration settings and try again.",
             },
         ) from exc
-

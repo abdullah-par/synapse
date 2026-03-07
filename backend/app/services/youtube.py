@@ -281,18 +281,15 @@ def get_transcript(video_id: str) -> tuple[str, str]:
             video_url = f"https://www.youtube.com/watch?v={video_id}"
             raw_text = get_transcript_assemblyai(video_url)
             transcript_source = "assemblyai"
-        except ValueError as exc:
-            # AssemblyAI key not configured — surface that clearly
+        except Exception as exc:
+            # AssemblyAI key not configured or other error — surface friendly message
             raise HTTPException(
                 status_code=500,
                 detail={
-                    "error": "assemblyai_not_configured",
-                    "message": str(exc),
+                    "error": "stt_unavailable",
+                    "message": "Audio transcription is currently unavailable for this video. Please try a video with manual captions.",
                 },
             ) from exc
-        except Exception:
-            # AssemblyAI also failed — fall through to final error
-            raw_text = None
 
     # ── All three methods failed ───────────────────────────────────────────
     if not raw_text:
@@ -301,9 +298,7 @@ def get_transcript(video_id: str) -> tuple[str, str]:
             status_code=404 if err_code != "transcript_error" else 500,
             detail={
                 "error": err_code,
-                "message": "No transcript available for this video. "
-                           "YouTube captions, yt-dlp subtitles, and AssemblyAI "
-                           "audio transcription all failed.",
+                "message": "We couldn't reach the transcript for this video. This can happen if captions are disabled or the video is restricted.",
             },
         )
 
@@ -332,4 +327,3 @@ def chunk_transcript(text: str, chunk_size: int = 35000, overlap: int = 1000) ->
         chunks.append(text[start:end])
         start = end - overlap
     return chunks
-

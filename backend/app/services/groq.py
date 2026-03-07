@@ -255,8 +255,7 @@ def _call_groq(system_prompt: str, user_prompt: str) -> Dict:
             status_code=500,
             detail={
                 "error": "ai_parse_error",
-                "message": "AI response could not be parsed. Please try again.",
-                "detail": str(exc),
+                "message": "We had trouble processing the AI's notes. Please try generating them again.",
             },
         ) from exc
     except Exception as exc:
@@ -264,8 +263,7 @@ def _call_groq(system_prompt: str, user_prompt: str) -> Dict:
             status_code=500,
             detail={
                 "error": "ai_error",
-                "message": "Note generation failed. Please try again.",
-                "detail": str(exc),
+                "message": "Our AI service is a bit busy or encountered an issue. Please try again in a moment.",
             },
         ) from exc
 
@@ -336,7 +334,7 @@ def _chunked_generation(
             status_code=500,
             detail={
                 "error": "ai_error",
-                "message": "Could not generate notes from any transcript chunk.",
+                "message": "The video content was too complex for our AI to process in parts. Please try a shorter video.",
             },
         )
 
