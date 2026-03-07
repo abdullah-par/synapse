@@ -18,6 +18,8 @@ _origins = [
     "https://synapse-kappa-opal.vercel.app",
     "https://www.usesynaps.tech",
     "https://usesynaps.tech",
+    "https://www.usesynapse.tech",
+    "https://usesynapse.tech",
     "https://synapse-production-9c44.up.railway.app"
 ]
 # Add whatever the deploy platform sets as FRONTEND_URL
@@ -38,8 +40,8 @@ app.add_middleware(
     allow_origins=_origins,
     allow_origin_regex=r"https://.*\.vercel\.app",  # covers all Vercel preview deploys
     allow_credentials=True,
-    allow_methods=["GET", "POST", "OPTIONS"],
-    allow_headers=["Content-Type", "Authorization"],
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # Register routers

@@ -5,4 +5,5 @@ dockerfilePath = "backend/Dockerfile"
 [deploy]
 # AssemblyAI transcription of long videos can take up to 3-6 minutes.
 # Raise the Uvicorn worker timeout to prevent Railway killing the request early.
+healthcheckPath = "/health"
 healthcheckTimeout = 300
