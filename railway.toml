@@ -5,7 +5,5 @@ dockerfilePath = "backend/Dockerfile"
 [deploy]
 healthcheckPath = "/health"
 healthcheckTimeout = 120
-startCommand = "uvicorn app.main:app --host 0.0.0.0 --port $PORT"
-
-
-
+# We removed startCommand here to allow the Dockerfile CMD to take over,
+# which handles $PORT interpolation more reliably in this environment.

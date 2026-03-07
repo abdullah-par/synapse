@@ -12,3 +12,5 @@ COPY backend/ .
 
 EXPOSE 8080
 
+# Shell form CMD ensures $PORT is expanded correctly by the container shell
+CMD uvicorn app.main:app --host 0.0.0.0 --port $PORT
