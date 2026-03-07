@@ -1,51 +1,18 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-
-from app.config import settings
 from app.routes import health, notes, notion, feedback
 
-app = FastAPI(
-    title="Synapse API",
-    version="1.0.0",
-    docs_url="/docs" if settings.environment == "development" else None,
-    redoc_url=None,
-)
+app = FastAPI(title="Synapse API")
 
-# ── CORS ──────────────────────────────────────────────────────────────────
-# Using a clean list of allowed origins. 
-# 502 indicates a generic server failure, often caused by the middleware 
-# crashing or a timeout. Removing the regex to be safe.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",
-        "https://usesynaps.tech",
-        "https://www.usesynaps.tech",
-        "https://usesynapse.tech",
-        "https://www.usesynapse.tech",
-        "https://synapse-kappa-opal.vercel.app",
-        "https://synapse-production-9c44.up.railway.app",
-    ],
-    allow_credentials=True,
+    allow_origins=["*"],
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-@app.get("/test-cors")
-async def test_cors():
-    return {"message": "CORS is working"}
-
-# Register routers
-app.include_router(health.router, tags=["Health"])
-app.include_router(notes.router, tags=["Notes"])
-app.include_router(notion.router, tags=["Notion"])
-app.include_router(feedback.router, tags=["Feedback"])
-
-
-
-
-if __name__ == "__main__":
-    import uvicorn
-
-    uvicorn.run("app.main:app", host="0.0.0.0", port=settings.port, reload=True)
-
+app.include_router(health.router)
+app.include_router(notes.router)
+app.include_router(notion.router)
+app.include_router(feedback.router)
