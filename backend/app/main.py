@@ -14,10 +14,18 @@ app = FastAPI(
     version="1.0.0",
 )
 
-# CORS - Most permissive for debugging
+# CORS configuration
+ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+    "http://localhost:3001",
+    "https://usesynaps.tech",
+    "https://www.usesynaps.tech",
+    "synapse-kappa-opal.vercel.app", # Vercel domain fallback
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=ALLOWED_ORIGINS,
     allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
