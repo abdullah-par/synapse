@@ -20,7 +20,7 @@ ALLOWED_ORIGINS = [
     "http://localhost:3001",
     "https://usesynaps.tech",
     "https://www.usesynaps.tech",
-    "synapse-kappa-opal.vercel.app", # Vercel domain fallback
+    "https://synapse-kappa-opal.vercel.app", # Vercel domain fallback
 ]
 
 app.add_middleware(
