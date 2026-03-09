@@ -23,6 +23,10 @@ ALLOWED_ORIGINS = [
     "https://synapse-kappa-opal.vercel.app", # Vercel domain fallback
 ]
 
+# Allow the configured frontend URL as well (from FRONTEND_URL env var)
+if settings.frontend_url and settings.frontend_url not in ALLOWED_ORIGINS:
+    ALLOWED_ORIGINS.append(settings.frontend_url)
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=ALLOWED_ORIGINS,
