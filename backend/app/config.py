@@ -8,7 +8,7 @@ class Settings(BaseSettings):
         extra="ignore"
     )
 
-    groq_api_key: str
+    groq_api_key: str = ""  # Required at runtime — set via GROQ_API_KEY env var
     database_url: str = ""  # PostgreSQL URL for persistent feedback storage
     notion_api_key: str = ""  # Optional — only needed if using Notion sync
     frontend_url: str = "http://localhost:3000"
