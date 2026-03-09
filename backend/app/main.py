@@ -44,6 +44,13 @@ app.include_router(feedback.router)
 @app.on_event("startup")
 async def startup_event():
     logger.info("Synapse API is starting up...")
+    from app.db import engine, init_db
+    if engine:
+        try:
+            init_db()
+            logger.info("Database initialized successfully.")
+        except Exception as e:
+            logger.warning(f"Database init failed (will use JSON fallback): {e}")
 
 if __name__ == "__main__":
     import uvicorn

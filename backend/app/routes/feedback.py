@@ -9,7 +9,7 @@ from fastapi import APIRouter, HTTPException, Depends
 from sqlmodel import Session, select
 
 from app.schemas.feedback import FeedbackSubmitRequest, FeedbackItem, FeedbackListResponse
-from app.db import engine, Feedback, init_db, get_session
+from app.db import engine, Feedback, get_session
 from app.config import settings
 
 router = APIRouter()
@@ -23,9 +23,7 @@ if _FEEDBACK_DIR:
 else:
     FEEDBACK_FILE = Path(__file__).resolve().parent.parent.parent / "feedback.json"
 
-# Initialize DB if configured
-if engine:
-    init_db()
+# DB initialization is handled in app startup (main.py)
 
 
 # ── JSON Fallback Helpers ────────────────────────────────────────────────
